@@ -1,0 +1,46 @@
+################### begin ################
+
+#########################################
+#
+#		uboot:		0.25M
+#		kernel:		2.5M
+#		rootfs:		2M
+#		appfs:		3.25M
+#
+#########################################
+
+SPI_NOR_INFO:
+	ERASE_SIZE=32K
+	PAGE_SIZE=256K
+
+PARTITION:
+	NAME=appfs
+	FS_TYPE=jffs2
+	#SIZE=11520K
+	SIZE=3328K
+	IS_ROOT=no
+	STRIPPED=yes
+	COPYLIST:
+
+# copy to appfs
+		special/ws/uvc.config  > bin/
+		special/ws/sc4335-t31.bin > etc/sensor
+		special/ws/ucamera > bin/
+		special/ws/app_init.sh > init/
+		ucamera/t31/uvc.attr > bin/
+
+		ucamera/t31/anticopy  > bin/
+		ucamera/t31/sensor_sc4335_t31.ko > lib/modules
+		ucamera/t31/usbcamera.ko> lib/modules
+		ucamera/t31/adbd  > bin/
+		ucamera/t31/lrz  > bin/
+		ucamera/t31/lsz  > bin/
+	        ucamera/t31/audio.ko > lib/modules
+		ucamera/t31/avpu.ko  > lib/modules
+		ucamera/t31/libcomposite.ko  > lib/modules
+		ucamera/t31/tx-isp-t31.ko > lib/modules
+		ucamera/t31/videobuf2-vmalloc.ko > lib/modules
+		# firmware/ > lib/
+		board/t31/.system > /
+
+################### end ################

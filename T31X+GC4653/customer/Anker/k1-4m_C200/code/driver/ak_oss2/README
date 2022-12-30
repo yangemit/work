@@ -1,0 +1,5 @@
+module_param:
+
+	snd_debug_level : 打印级别， 默认1
+	codec_type:       codec 类型， 0 -- 内部codec, 1 外部codec
+        dmic_channel:     dmic 声道，1 单声道, 2 双声道

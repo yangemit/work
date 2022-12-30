@@ -1,0 +1,30 @@
+choice
+	prompt "Board type"
+	depends on PLATFORM_T31_ISVP
+	default BOARD_SWAN
+
+config BOARD_SWAN
+       bool "Swan"
+       depends on PLATFORM_T31_ISVP
+
+endchoice
+
+config PRODUCT_IGOR
+	tristate "Product name igor"
+	default n
+
+config PRODUCT_DIVA
+	tristate "Product name diva"
+	default n
+
+config PRODUCT_ARES
+	tristate "Product name ares"
+	default n
+
+config PRODUCT_KIVA
+	tristate "Product name kiva"
+	default n
+
+config BOARD_NAME
+	string
+	default "Swan" if BOARD_SWAN

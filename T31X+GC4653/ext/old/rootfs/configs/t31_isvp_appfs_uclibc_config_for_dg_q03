@@ -1,0 +1,49 @@
+################### begin ################
+
+#########################################
+#
+#		uboot:		0.25M
+#		kernel:		2.5M
+#		rootfs:		2M
+#		appfs:		3.25M
+#
+#########################################
+
+SPI_NOR_INFO:
+	ERASE_SIZE=32K
+	PAGE_SIZE=256K
+
+PARTITION:
+	NAME=appfs
+	FS_TYPE=jffs2
+	#SIZE=11520K
+	SIZE=3328K
+	IS_ROOT=no
+	STRIPPED=yes
+	COPYLIST:
+
+# copy to appfs
+		special/dg_q03/jxq03-t31.bin > etc/sensor
+		special/dg_q03/ucamera > bin/
+		special/dg_q03/app_init.sh > init/
+		special/dg_q03/sensor_jxq03_t31.ko > lib/modules
+		special/dg_q03/avpu.ko  > lib/modules
+		special/dg_q03/tx-isp-t31.ko > lib/modules
+
+		special/dg_q03/uvc.config  > config/
+		ucamera/t31/uvc.attr  > config/
+		ucamera/t31/anticopy  > bin/
+
+		ucamera/t31/usbcamera.ko> lib/modules
+
+		ucamera/t31/adbd  > bin/
+		ucamera/t31/lrz  > bin/
+		ucamera/t31/lsz  > bin/
+
+	        ucamera/t31/audio.ko > lib/modules
+		ucamera/t31/libcomposite.ko  > lib/modules
+		ucamera/t31/videobuf2-vmalloc.ko > lib/modules
+		# firmware/ > lib/
+		board/t31/.system > /
+
+################### end ################

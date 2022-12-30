@@ -1,0 +1,7 @@
+tx-isp-t31
+	更新到最新sdk，解决1080@60fps 真率不稳
+ak_oss2
+	Anker 外部I2S DMIC(8~48k)，SDK 实际调用AMIC 的接口
+
+sensor
+	修改降低sensor 驱动能力

@@ -1,0 +1,48 @@
+################### begin ################
+
+#########################################
+#
+#		uboot:		0.25M
+#		kernel:		2.5M
+#		rootfs:		2M
+#		appfs:		3.25M
+#
+#########################################
+
+SPI_NOR_INFO:
+	ERASE_SIZE=32K
+	PAGE_SIZE=256K
+
+PARTITION:
+	NAME=appfs
+	FS_TYPE=jffs2
+	#SIZE=11520K
+	SIZE=3328K
+	IS_ROOT=no
+	STRIPPED=yes
+	COPYLIST:
+	
+# copy to appfs
+		ucamera/t21/uvc.config  > bin/
+		ucamera/t21/uvc.attr > bin/
+		ucamera/t21/jxf37-t21.bin > etc/sensor
+
+		ucamera/t21/ucamera  > bin/
+		ucamera/t21/anticopy  > bin/
+		ucamera/t21/sensor_jxf37_t21.ko > lib/modules
+		ucamera/t21/app_init.sh > init/
+
+		ucamera/t21/usbcamera_t21.ko> lib/modules
+
+		ucamera/t21/adbd  > bin/
+		ucamera/t21/lrz  > bin/
+		ucamera/t21/lsz  > bin/
+
+	        ucamera/t21/audio.ko > lib/modules
+		ucamera/t21/libcomposite.ko  > lib/modules
+		ucamera/t21/tx-isp-t21.ko > lib/modules
+		ucamera/t21/videobuf2-vmalloc.ko > lib/modules
+		# firmware/ > lib/
+		board/t21/.system > /
+
+################### end ################

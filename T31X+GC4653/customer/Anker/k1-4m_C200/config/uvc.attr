@@ -1,0 +1,17 @@
+powerline_freq:0000
+contrast:0050
+brightness:0050
+saturation:0050
+sharpness:0050
+white_balance:0168
+white_balance_auto:0001
+backlight:0000
+hvflip:0000
+zoom:000000af
+pan:00000000
+tilt:00000000
+fov:0000005f
+audio_angle:0000005a
+pantilt_mode:00000000
+hdr_mode:00000000
+config_version:v1.0

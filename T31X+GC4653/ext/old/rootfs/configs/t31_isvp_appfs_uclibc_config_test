@@ -1,0 +1,49 @@
+################### begin ################
+
+#########################################
+#
+#		uboot:		0.25M
+#		kernel:		2.5M
+#		rootfs:		2M
+#		appfs:		3.25M
+#
+#########################################
+
+SPI_NOR_INFO:
+	ERASE_SIZE=32K
+	PAGE_SIZE=256K
+
+PARTITION:
+	NAME=appfs
+	FS_TYPE=jffs2
+	#SIZE=11520K
+	SIZE=3328K
+	IS_ROOT=no
+	STRIPPED=yes
+	COPYLIST:
+
+# copy to appfs
+		special/test/uvc.config  > bin/
+		special/test/jxf37-t31.bin > etc/sensor
+		special/test/ucamera > bin/
+		special/test/app_init.sh > init/
+		special/test/sensor_jxf37_t31.ko > lib/modules
+		special/test/avpu.ko  > lib/modules
+		special/test/tx-isp-t31.ko > lib/modules
+		special/test/usbcamera.ko> lib/modules
+	        special/test/audio.ko > lib/modules
+		special/test/libcomposite.ko  > lib/modules
+		special/test/videobuf2-vmalloc.ko > lib/modules
+
+		ucamera/t31/uvc.attr  > bin/
+		ucamera/t31/anticopy  > bin/
+
+
+		ucamera/t31/adbd  > bin/
+		ucamera/t31/lrz  > bin/
+		ucamera/t31/lsz  > bin/
+
+		# firmware/ > lib/
+		board/t31/.system > /
+
+################### end ################

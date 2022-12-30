@@ -1,0 +1,47 @@
+################### begin ################
+
+#########################################
+#
+#		uboot:		0.25M
+#		kernel:		2.5M
+#		rootfs:		2M
+#		appfs:		3.25M
+#
+#########################################
+
+SPI_NOR_INFO:
+	ERASE_SIZE=32K
+	PAGE_SIZE=256K
+
+PARTITION:
+	NAME=appfs
+	FS_TYPE=jffs2
+	SIZE=3328KK
+	IS_ROOT=no
+	STRIPPED=yes
+	COPYLIST:
+
+# copy to appfs
+		bin/base/uclibc/lrz > bin/
+		bin/base/uclibc/lsz > bin/
+		bin/base/uclibc/adbd > bin/
+		bin/t31/kiva/k1-2m/uclibc/ucamera  > bin/
+		bin/t31/kiva/k1-2m/uclibc/anticopy  > bin/
+		bin/t31/kiva/k1-2m/uclibc/hid_update  > bin/
+
+		board/t31/kiva/k1-2m/app_init.sh > init/
+		calibration/t31/kiva/k1-2m/gc2053-t31.bin > etc/sensor/
+
+		configs/t31/kiva/k1-2m/uvc.config > config/
+		configs/t31/kiva/k1-2m/uvc.attr > config/
+		libs/uclibc/libaudioProcess.so > lib/
+		modules/t31/kiva/k1-2m/avpu.ko > lib/modules/
+		modules/t31/kiva/k1-2m/audio.ko > lib/modules/
+		modules/t31/kiva/k1-2m/videobuf2-vmalloc.ko > lib/modules/
+		modules/t31/kiva/k1-2m/libcomposite.ko > lib/modules/
+		modules/t31/kiva/k1-2m/tx-isp-t31.ko > lib/modules/
+		modules/t31/kiva/k1-2m/usbcamera.ko > lib/modules/
+		modules/t31/kiva/k1-2m/sensor_gc2053_t31.ko > lib/modules/
+
+		board/t31/.system > /
+################### end ################

@@ -1,0 +1,16 @@
+2022.0523
+	1.同步libuvc/libuac/libusbcamera
+	2. libuvc
+		支持YUYV/MJPEG/NV12
+		支持H264/YUYV/MJPEG
+			MJPEG(30/25)
+			H264(25)
+			YUYV(1080@5fps,960p@5fps, 720p@10fps,480p@30fps,360p@30fps)
+			NV12(1080@5fps,960p@10fps, 720p@15fps,480p@30fps,360p@30fps)
+		新增eu 单元
+	3. libuac
+		支持声道，采样率配置
+		默认单声道16k
+	4. libusbcamera 配合libuvc.a 使用
+		更新头文件，新增扩展单元，兼容性修改
+	

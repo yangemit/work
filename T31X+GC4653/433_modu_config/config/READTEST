@@ -1,0 +1,7 @@
+说明：
+
+patch文件是配置kernel
+
+gpio-ir-recv.c-----硬件gpio驱动文件
+
+ir-nec-decoder.c----红外控制解码协议

@@ -1,0 +1,11 @@
+tags
+*.swp
+*.o
+.boards.depend
+iboot.bin
+include/generated/
+spl/arch/
+spl/lib/
+spl/src/
+tools/.depend
+tools/ingenic-tools/.depend

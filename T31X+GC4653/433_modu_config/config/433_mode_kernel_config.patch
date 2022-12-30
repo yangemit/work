@@ -1,0 +1,675 @@
+diff --git a/.gitignore b/.gitignore
+index c8f9a35..d5537c5 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,9 +1,7 @@
+-*.o
+ *.o.cmd
+ *.ko.cmd
+ *.mod.c
+ *~
+-*.a
+ *.ko
+ 
+ tags
+diff --git a/T31/drivers/sensors-t31/gc2093/Makefile b/T31/drivers/sensors-t31/gc2093/Makefile
+index f8047fa..ce7fd98 100755
+--- a/T31/drivers/sensors-t31/gc2093/Makefile
++++ b/T31/drivers/sensors-t31/gc2093/Makefile
+@@ -6,7 +6,7 @@ endif
+ 
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+ 
+-ISP_DRIVER_DIR = $(PWD)/../../isp-t31/tx-isp-t31/
++ISP_DRIVER_DIR = $(PWD)/../../tx-isp-t31/
+ 
+ ############ name define #############
+ MODULE_NAME := sensor_gc2093_t31
+diff --git a/T31/drivers/sensors-t31/gc4653/gc4653.c b/T31/drivers/sensors-t31/gc4653/gc4653.c
+index 36f5a1e..ed7e6be 100755
+--- a/T31/drivers/sensors-t31/gc4653/gc4653.c
++++ b/T31/drivers/sensors-t31/gc4653/gc4653.c
+@@ -265,7 +265,7 @@ struct tx_isp_sensor_attribute gc4653_attr={
+ 	.chip_id = 0x4653,
+ 	.cbus_type = TX_SENSOR_CONTROL_INTERFACE_I2C,
+ 	.cbus_mask = V4L2_SBUS_MASK_SAMPLE_8BITS | V4L2_SBUS_MASK_ADDR_8BITS,
+-	.cbus_device = 0x29,
++	.cbus_device = 0x10,
+ 	.max_again = 409243,
+ 	.max_dgain = 0,
+ 	.expo_fs = 1,
+diff --git a/T31/kernel/drivers/input/keyboard/gpio_keys.c b/T31/kernel/drivers/input/keyboard/gpio_keys.c
+index b29ca65..ced5951 100644
+--- a/T31/kernel/drivers/input/keyboard/gpio_keys.c
++++ b/T31/kernel/drivers/input/keyboard/gpio_keys.c
+@@ -730,7 +730,7 @@ static int gpio_keys_probe(struct platform_device *pdev)
+ 	/* Enable auto repeat feature of Linux input subsystem */
+ 	if (pdata->rep)
+ 		__set_bit(EV_REP, input->evbit);
+-
++	
+ 	for (i = 0; i < pdata->nbuttons; i++) {
+ 		const struct gpio_keys_button *button = &pdata->buttons[i];
+ 		struct gpio_button_data *bdata = &ddata->data[i];
+diff --git a/T31/kernel/drivers/media/rc/gpio-ir-recv.c b/T31/kernel/drivers/media/rc/gpio-ir-recv.c
+index 8b82ae9..957378b 100644
+--- a/T31/kernel/drivers/media/rc/gpio-ir-recv.c
++++ b/T31/kernel/drivers/media/rc/gpio-ir-recv.c
+@@ -106,6 +106,8 @@ static int gpio_ir_recv_probe(struct platform_device *pdev)
+ 					pdev->dev.platform_data;
+ 	int rc;
+ 
++	printk("[INFO] in gpio ir\n");
++	
+ 	if (pdev->dev.of_node) {
+ 		struct gpio_ir_recv_platform_data *dtpdata =
+ 			devm_kzalloc(&pdev->dev, sizeof(*dtpdata), GFP_KERNEL);
+@@ -127,6 +129,8 @@ static int gpio_ir_recv_probe(struct platform_device *pdev)
+ 	if (!gpio_dev)
+ 		return -ENOMEM;
+ 
++	printk("[INFO] event on\n");
++	
+ 	rcdev = rc_allocate_device();
+ 	if (!rcdev) {
+ 		rc = -ENOMEM;
+@@ -147,12 +151,19 @@ static int gpio_ir_recv_probe(struct platform_device *pdev)
+ 		rcdev->allowed_protos = pdata->allowed_protos;
+ 	else
+ 		rcdev->allowed_protos = RC_BIT_ALL;
++	
++	printk("[protos type] %d \n",rcdev->allowed_protos);
++
+ 	rcdev->map_name = pdata->map_name ?: RC_MAP_EMPTY;
+ 
++	printk("[map_name] %s \n",rcdev->map_name);
++
+ 	gpio_dev->rcdev = rcdev;
+ 	gpio_dev->gpio_nr = pdata->gpio_nr;
+ 	gpio_dev->active_low = pdata->active_low;
+ 
++	printk("[gpio info] gpio nr: %d \n",pdata->gpio_nr);
++	
+ 	rc = gpio_request(pdata->gpio_nr, "gpio-ir-recv");
+ 	if (rc < 0)
+ 		goto err_gpio_request;
+diff --git a/T31/kernel/drivers/media/rc/ir-nec-decoder.c b/T31/kernel/drivers/media/rc/ir-nec-decoder.c
+index 9a90094..7068cd3 100644
+--- a/T31/kernel/drivers/media/rc/ir-nec-decoder.c
++++ b/T31/kernel/drivers/media/rc/ir-nec-decoder.c
+@@ -17,16 +17,17 @@
+ #include "rc-core-priv.h"
+ 
+ #define NEC_NBITS		32
+-#define NEC_UNIT		562500  /* ns */
+-#define NEC_HEADER_PULSE	(16 * NEC_UNIT)
+-#define NECX_HEADER_PULSE	(8  * NEC_UNIT) /* Less common NEC variant */
+-#define NEC_HEADER_SPACE	(8  * NEC_UNIT)
+-#define NEC_REPEAT_SPACE	(4  * NEC_UNIT)
+-#define NEC_BIT_PULSE		(1  * NEC_UNIT)
+-#define NEC_BIT_0_SPACE		(1  * NEC_UNIT)
+-#define NEC_BIT_1_SPACE		(3  * NEC_UNIT)
+-#define	NEC_TRAILER_PULSE	(1  * NEC_UNIT)
+-#define	NEC_TRAILER_SPACE	(10 * NEC_UNIT) /* even longer in reality */
++#define NEC_UNIT		18750             /* 18.75us  *2 = 37.5 us  /2 = 9.3 */
++#define NEC_HEADER_PULSE	(16 * NEC_UNIT)   /* 300us 数据头开始高电平的标准时间 */
++//#define NECX_HEADER_PULSE	(8  * NEC_UNIT) /* 4.5 ms Less common NEC variant */
++#define NEC_HEADER_SPACE	(210  * NEC_UNIT) /* 3.93 ms 数据头开始低电平的标准时间 */
++//#define NEC_REPEAT_SPACE	(4  * NEC_UNIT) /* 2.25ms */
++#define NEC_BIT_PULSE_300	(16  * NEC_UNIT)  /* 300 us bit-0 数据高电平标准时间 */
++#define NEC_BIT_PULSE_900	(48  * NEC_UNIT)  /* 900 us bit-1 数据高电平标准时间 */
++#define NEC_BIT_0_SPACE		(48  * NEC_UNIT)  /* 900 us bit-0 数据低电平标准时间 */
++#define NEC_BIT_1_SPACE		(16  * NEC_UNIT)  /* 300 us bit-1 数据低电平标准时间 */
++//#define	NEC_TRAILER_PULSE	(1  * NEC_UNIT)  
++#define	NEC_TRAILER_SPACE	(10 * NEC_UNIT) /* even longer in reality 后期配置 */
+ #define NECX_REPEAT_BITS	1
+ 
+ enum nec_state {
+@@ -38,6 +39,8 @@ enum nec_state {
+ 	STATE_TRAILER_SPACE,
+ };
+ 
++static int bit_flag = 0; 
++ 
+ /**
+  * ir_nec_decode() - Decode one NEC pulse or space
+  * @dev:	the struct rc_dev descriptor of the device
+@@ -64,18 +67,23 @@ static int ir_nec_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 	IR_dprintk(2, "NEC decode started at state %d (%uus %s)\n",
+ 		   data->state, TO_US(ev.duration), TO_STR(ev.pulse));
+ 
++	//printk("[INFO] switch %d \n",data->state);
+ 	switch (data->state) {
+ 
+ 	case STATE_INACTIVE:
++		/*
++			gpio值为1代表高脉冲
++		*/
+ 		if (!ev.pulse)
+ 			break;
+-
+-		if (eq_margin(ev.duration, NEC_HEADER_PULSE, NEC_UNIT * 2)) {
+-			data->is_nec_x = false;
+-			data->necx_repeat = false;
+-		} else if (eq_margin(ev.duration, NECX_HEADER_PULSE, NEC_UNIT / 2))
+-			data->is_nec_x = true;
+-		else
++		/*
++			300 - 18.75 * 5 < 头脉冲时间-高 < 300 + 18.75 * 5
++		*/
++		if (eq_margin(ev.duration, NEC_HEADER_PULSE, NEC_UNIT * 5)) {
++			/*data->is_nec_x = false;*/
++			/*data->necx_repeat = false;*/
++			//printk("[INFO] 300 us  %u \n",ev.duration);
++		} else
+ 			break;
+ 
+ 		data->count = 0;
+@@ -83,36 +91,69 @@ static int ir_nec_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 		return 0;
+ 
+ 	case STATE_HEADER_SPACE:
++		/*
++			gpio 值为0代表低电平
++		*/
+ 		if (ev.pulse)
+ 			break;
+-
+-		if (eq_margin(ev.duration, NEC_HEADER_SPACE, NEC_UNIT)) {
++		/*
++			3.93 + 0.468 ms < 头脉冲时间-低 < 3.93 + 0.468 ms
++		*/
++		//printk("[INFO] 4ms %d \n",ev.duration);
++		if (eq_margin(ev.duration, NEC_HEADER_SPACE, NEC_UNIT * 25)) {
+ 			data->state = STATE_BIT_PULSE;
++			dev->keypressed = true;
++			//printk("[INFO] 4ms %d \n",ev.duration);
+ 			return 0;
+-		} else if (eq_margin(ev.duration, NEC_REPEAT_SPACE, NEC_UNIT / 2)) {
+-			if (!dev->keypressed) {
+-				IR_dprintk(1, "Discarding last key repeat: event after key up\n");
+-			} else {
+-				rc_repeat(dev);
+-				IR_dprintk(1, "Repeat last key\n");
+-				data->state = STATE_TRAILER_PULSE;
+-			}
+-			return 0;
+-		}
++			//} else {
++			// 	bit_5--;
++			//	break;
++			//}
++		} 
++		/*else if (eq_margin(ev.duration, NEC_REPEAT_SPACE, NEC_UNIT / 2)) {*/
++			/*if (!dev->keypressed) {*/
++				/*IR_dprintk(1, "Discarding last key repeat: event after key up\n");*/
++			/*} else {*/
++				/*rc_repeat(dev);*/
++				/*IR_dprintk(1, "Repeat last key\n");*/
++				/*data->state = STATE_TRAILER_PULSE;*/
++			/*}*/
++			/*return 0;*/
++		/*}*/
+ 
+ 		break;
+ 
+ 	case STATE_BIT_PULSE:
++		/*
++			bit-高
++		*/
+ 		if (!ev.pulse)
+ 			break;
+ 
+-		if (!eq_margin(ev.duration, NEC_BIT_PULSE, NEC_UNIT / 2))
++		/*
++			bit0-头：300 - 93.7 ~ 300 + 93.7
++		*/
++		if (eq_margin(ev.duration, NEC_BIT_PULSE_300, NEC_UNIT * 5))
++		{
++			bit_flag = 0;
++		} else if (eq_margin(ev.duration,NEC_BIT_PULSE_900,NEC_UNIT * 5)) {
++			/*
++				bit1-头：900 - 93.7 ~ 900 + 93.7
++			*/
++			bit_flag = 1;
++		} else {
++			//printk("[INFO] bit head failed %d \n",ev.duration);
+ 			break;
++		}
++			//printk("[INFO] bit head Success %d \n",ev.duration);
+ 
+ 		data->state = STATE_BIT_SPACE;
+ 		return 0;
+ 
+ 	case STATE_BIT_SPACE:
++		/*
++			bit-低
++		*/
+ 		if (ev.pulse)
+ 			break;
+ 
+@@ -126,16 +167,29 @@ static int ir_nec_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 
+ 		} else if (data->count > NECX_REPEAT_BITS)
+ 			data->necx_repeat = false;
+-
++		/*
++			data->bits 每调一次左移位
++		*/
+ 		data->bits <<= 1;
+-		if (eq_margin(ev.duration, NEC_BIT_1_SPACE, NEC_UNIT / 2))
++		/*
++			bit1-尾 ：900 - 93.7 ~ 900 + 93.7 && bit_flag=1
++		*/
++		if (eq_margin(ev.duration, NEC_BIT_1_SPACE, NEC_UNIT * 5 ) && bit_flag)
+ 			data->bits |= 1;
+-		else if (!eq_margin(ev.duration, NEC_BIT_0_SPACE, NEC_UNIT / 2))
++		else if (!eq_margin(ev.duration, NEC_BIT_0_SPACE, NEC_UNIT * 5))
+ 			break;
+ 		data->count++;
+-
+-		if (data->count == NEC_NBITS)
++		
++		
++		//printk("[INFO %d] bit wei %d \n",data->count,ev.duration );
++		
++		if (data->count == NEC_NBITS) {
+ 			data->state = STATE_TRAILER_PULSE;
++			//printk("[INFO] bit 24 %x \n",bitrev8((data->bits >> 24) & 0xff));
++			//printk("[INFO] bit 16 %x \n",bitrev8((data->bits >> 16) & 0xff));
++			//printk("[INFO] bit 8 %x \n",bitrev8((data->bits >> 8) & 0xff));
++			//printk("[INFO] bit 0 %x \n",bitrev8((data->bits >> 0) & 0xff));
++		}
+ 		else
+ 			data->state = STATE_BIT_PULSE;
+ 
+@@ -144,9 +198,9 @@ static int ir_nec_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 	case STATE_TRAILER_PULSE:
+ 		if (!ev.pulse)
+ 			break;
+-
+-		if (!eq_margin(ev.duration, NEC_TRAILER_PULSE, NEC_UNIT / 2))
+-			break;
++		//printk("[INFO] TRAILER %d \n",ev.duration);
++		/*if (!eq_margin(ev.duration, NEC_TRAILER_PULSE, NEC_UNIT / 2))*/
++			/*break;*/
+ 
+ 		data->state = STATE_TRAILER_SPACE;
+ 		return 0;
+@@ -158,12 +212,18 @@ static int ir_nec_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 		if (!geq_margin(ev.duration, NEC_TRAILER_SPACE, NEC_UNIT / 2))
+ 			break;
+ 
+-		address     = bitrev8((data->bits >> 24) & 0xff);
+-		not_address = bitrev8((data->bits >> 16) & 0xff);
+-		command	    = bitrev8((data->bits >>  8) & 0xff);
+-		not_command = bitrev8((data->bits >>  0) & 0xff);
+-
+-		if ((command ^ not_command) != 0xff) {
++		/*
++			将得到的32bit 编码进行分解
++			433 模块
++			command = not_command = 按键值
++			not_address << 8 | address = 设备ID = 0xdf01
++		*/
++		command     = bitrev8((data->bits >> 24) & 0xff);
++		not_command = bitrev8((data->bits >> 16) & 0xff);
++		address	    = bitrev8((data->bits >>  8) & 0xff);
++		not_address = bitrev8((data->bits >>  0) & 0xff);
++
++		if ((command != not_command)) {
+ 			IR_dprintk(1, "NEC checksum error: received 0x%08x\n",
+ 				   data->bits);
+ 			send_32bits = true;
+@@ -174,7 +234,7 @@ static int ir_nec_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 			 * least Apple and TiVo remotes */
+ 			scancode = data->bits;
+ 			IR_dprintk(1, "NEC (modified) scancode 0x%08x\n", scancode);
+-		} else if ((address ^ not_address) != 0xff) {
++		} else if ((address == not_address) ) {
+ 			/* Extended NEC */
+ 			scancode = address     << 16 |
+ 				   not_address <<  8 |
+@@ -182,13 +242,26 @@ static int ir_nec_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 			IR_dprintk(1, "NEC (Ext) scancode 0x%06x\n", scancode);
+ 		} else {
+ 			/* Normal NEC */
+-			scancode = address << 8 | command;
++			scancode = command;
++			/*
++				当按键按下时，会多申报一个input event事件----且value=0
++				与我设置的 0 键值中途，所有将其改变为 0xa0 与 rc-map 里的
++				文件键值映射对应
++			*/
++			if( scancode == 0) {
++				scancode = 0xa0;
++			}
+ 			IR_dprintk(1, "NEC scancode 0x%04x\n", scancode);
+ 		}
++		
++		//printk("[INFO] scancode %x \n",scancode);
+ 
+ 		if (data->is_nec_x)
+ 			data->necx_repeat = true;
+ 
++		/*
++			按键值的映射----将得到的command 与 映射文件进行匹配-----来上报按键事件
++		*/
+ 		rc_keydown(dev, scancode, 0);
+ 		data->state = STATE_INACTIVE;
+ 		return 0;
+diff --git a/T31/kernel/drivers/media/rc/keymaps/rc-lirc.c b/T31/kernel/drivers/media/rc/keymaps/rc-lirc.c
+index fbf08fa..b7a2d1f 100644
+--- a/T31/kernel/drivers/media/rc/keymaps/rc-lirc.c
++++ b/T31/kernel/drivers/media/rc/keymaps/rc-lirc.c
+@@ -13,7 +13,19 @@
+ #include <linux/module.h>
+ 
+ static struct rc_map_table lirc[] = {
+-	{ },
++	{ 0x80 , KEY_1},
++	{ 0x50 , KEY_2},
++	{ 0x10 , KEY_3},
++	{ 0x20 , KEY_4},
++	{ 0x28 , KEY_5},
++	{ 0x18 , KEY_6},
++	{ 0x38 , KEY_7},
++	{ 0x40 , KEY_8},
++	{ 0x48 , KEY_9},
++	{ 0x58 , KEY_F1},
++	{ 0x60 , KEY_F2},
++	{ 0xa0 , KEY_F3},
++	{ 0x30 , KEY_F4},
+ };
+ 
+ static struct rc_map_list lirc_map = {
+diff --git a/T31/kernel/drivers/media/rc/rc-main.c b/T31/kernel/drivers/media/rc/rc-main.c
+index 1cf382a..bc6053f 100644
+--- a/T31/kernel/drivers/media/rc/rc-main.c
++++ b/T31/kernel/drivers/media/rc/rc-main.c
+@@ -668,7 +668,7 @@ void rc_keydown(struct rc_dev *dev, int scancode, u8 toggle)
+ 
+ 	spin_lock_irqsave(&dev->keylock, flags);
+ 	ir_do_keydown(dev, scancode, keycode, toggle);
+-
++	
+ 	if (dev->keypressed) {
+ 		dev->keyup_jiffies = jiffies + msecs_to_jiffies(IR_KEYPRESS_TIMEOUT);
+ 		mod_timer(&dev->timer_keyup, dev->keyup_jiffies);
+diff --git a/T40/drivers/sensors-t40/gc2053/Makefile b/T40/drivers/sensors-t40/gc2053/Makefile
+index 8a1602c..1bb5879 100644
+--- a/T40/drivers/sensors-t40/gc2053/Makefile
++++ b/T40/drivers/sensors-t40/gc2053/Makefile
+@@ -1,12 +1,12 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+ ifeq (${ISVP_ENV_KERNEL_DIR}, )
+-	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4.94
++	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel
+ endif
+ 
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+ 
+-ISP_DRIVER_DIR = $(PWD)/../../isp-t40/tx-isp-t40/
++ISP_DRIVER_DIR = $(PWD)/../../tx-isp-t40/
+ 
+ ############ name define #############
+ MODULE_NAME := sensor_gc2053_t40
+diff --git a/T40/drivers/sensors-t40/gc4653/Makefile b/T40/drivers/sensors-t40/gc4653/Makefile
+index 2b9f943..49300b0 100755
+--- a/T40/drivers/sensors-t40/gc4653/Makefile
++++ b/T40/drivers/sensors-t40/gc4653/Makefile
+@@ -1,12 +1,12 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+ ifeq (${ISVP_ENV_KERNEL_DIR}, )
+-	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4.94
++	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel
+ endif
+ 
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+ 
+-ISP_DRIVER_DIR = $(PWD)/../../isp-t40/tx-isp-t40/
++ISP_DRIVER_DIR = $(PWD)/../../tx-isp-t40/
+ 
+ ############ name define #############
+ MODULE_NAME := sensor_gc4653_t40
+diff --git a/T40/drivers/sensors-t40/imx415/Makefile b/T40/drivers/sensors-t40/imx415/Makefile
+index 918e5c1..fe93ad7 100644
+--- a/T40/drivers/sensors-t40/imx415/Makefile
++++ b/T40/drivers/sensors-t40/imx415/Makefile
+@@ -1,12 +1,12 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+ ifeq (${ISVP_ENV_KERNEL_DIR}, )
+-	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4.94
++	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel
+ endif
+ 
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+ 
+-ISP_DRIVER_DIR = $(PWD)/../../isp-t40/tx-isp-t40/
++ISP_DRIVER_DIR = $(PWD)/../../tx-isp-t40/
+ 
+ ############ name define #############
+ MODULE_NAME := sensor_imx415_t40
+diff --git a/T40/kernel-4.4.94/drivers/video/ingenic_i2d/ingenic_i2d.c b/T40/kernel-4.4.94/drivers/video/ingenic_i2d/ingenic_i2d.c
+index 0c85866..b02986f 100755
+--- a/T40/kernel-4.4.94/drivers/video/ingenic_i2d/ingenic_i2d.c
++++ b/T40/kernel-4.4.94/drivers/video/ingenic_i2d/ingenic_i2d.c
+@@ -166,19 +166,12 @@ static int i2d_reg_set(struct jz_i2d *i2d, struct i2d_param *i2d_param)
+     mirr_enable = ip->mirr_enable;
+     rotate_enable = ip->rotate_enable;
+     rotate_angle = ip->rotate_angle;
+-    dst_y_strid = srcw;
+-    dst_uv_strid = srcw;
++    dst_y_strid = ip->dst_y_strid;
++    dst_uv_strid = ip->dst_uv_strid;
++    src_y_strid = ip->src_y_strid;
++    src_uv_strid = ip->src_uv_strid;
+     switch(fmt) {
+         case PIX_FMT_NV12:
+-            src_y_strid  = srcw;
+-            src_uv_strid = srcw;
+-            if ((rotate_angle == 0) || (rotate_angle == 180) || (flip_enable == 1) || (mirr_enable == 1)) {
+-                dst_y_strid = srcw;
+-                dst_uv_strid = srcw;
+-            } else if (((rotate_angle == 90) || (rotate_angle == 270)) && (rotate_enable == 1)) {
+-                dst_y_strid = srch;
+-                dst_uv_strid = srch;
+-            }
+             reg_write(i2d, I2D_IMG_MODE, I2D_DATA_TYPE_NV12);
+             break;
+         case HAL_PIXEL_FORMAT_RAW8:
+diff --git a/T40/sdk/src/imp/framesource/framesource_tseries.c b/T40/sdk/src/imp/framesource/framesource_tseries.c
+index 18edb0c..6a7922b 100755
+--- a/T40/sdk/src/imp/framesource/framesource_tseries.c
++++ b/T40/sdk/src/imp/framesource/framesource_tseries.c
+@@ -901,15 +901,23 @@ static int i2d_start(FSChannel *channel, IMPFrameInfo *frame,IMPFrameInfo *i2dfr
+     i2dp.src_h        = frame->height;
+     i2dp.data_type    = channel->attr.pixFmt;
+     i2dp.rotate_enable    = channel->attr.i2dattr.rotate_enable;
++    i2dp.src_addr_y   = frame->phyAddr;
++    i2dp.src_y_strid  = ALIGN(frame->width,I2D_ALIGNMENT);
++    i2dp.src_uv_strid = ALIGN(frame->width,I2D_ALIGNMENT);
++
++    i2dp.dst_y_strid  = ALIGN(frame->width,I2D_ALIGNMENT);
++    i2dp.dst_uv_strid = ALIGN(frame->width,I2D_ALIGNMENT);
+     if(channel->attr.i2dattr.rotate_enable == 1) {
+         i2dp.rotate_angle    = channel->attr.i2dattr.rotate_angle;
++	if((90 == i2dp.rotate_angle) || (270 == i2dp.rotate_angle)) {
++		i2dp.dst_y_strid = ALIGN(frame->height,I2D_ALIGNMENT);
++		i2dp.dst_uv_strid = ALIGN(frame->height,I2D_ALIGNMENT);
++	}
+     }
+     i2dp.flip_enable    = channel->attr.i2dattr.flip_enable;
+     i2dp.mirr_enable    = channel->attr.i2dattr.mirr_enable;
+-    i2dp.src_addr_y   = frame->phyAddr;
+     i2dp.dst_addr_y   = i2dframe->phyAddr;
+-    //i2dp.src_addr_y   = frame->virAddr;
+-    //i2dp.dst_addr_y   = i2dframe->virAddr;
++    
+     ret = ioctl(channel->i2d_fd, IOCTL_I2D_START, &i2dp);
+     if (ret < 0) {
+         printf("i2d ioctl test error: ret = %d\n", ret);
+diff --git a/T40/sdk/src/imp/tools/__pycache__/def_mxu3_asm.cpython-35.pyc b/T40/sdk/src/imp/tools/__pycache__/def_mxu3_asm.cpython-35.pyc
+index 56d8547..ba0e4b3 100644
+Binary files a/T40/sdk/src/imp/tools/__pycache__/def_mxu3_asm.cpython-35.pyc and b/T40/sdk/src/imp/tools/__pycache__/def_mxu3_asm.cpython-35.pyc differ
+diff --git a/T40/sdk/src/imp/video/alcodec/lib_codec/lib_codec.c b/T40/sdk/src/imp/video/alcodec/lib_codec/lib_codec.c
+index 1fe3c33..bd0425d 100755
+--- a/T40/sdk/src/imp/video/alcodec/lib_codec/lib_codec.c
++++ b/T40/sdk/src/imp/video/alcodec/lib_codec/lib_codec.c
+@@ -772,7 +772,7 @@ int AL_Codec_Encode_Create(AL_CodecEncode **pCodecEncode,  AL_CodecParam *pCodec
+   AL_CodecEncode *pThis = NULL;
+   int iLayerID = 0;  //fixme we only support 1 layers
+   int i = 0;
+-  int bRet = 0;
++  int bRet = 0,stridew = 0;
+   AL_ESrcMode eSrcMode = AL_SRC_NVX;
+ 
+   pThis = Rtos_Malloc(sizeof(AL_CodecEncode));
+@@ -885,7 +885,8 @@ int AL_Codec_Encode_Create(AL_CodecEncode **pCodecEncode,  AL_CodecParam *pCodec
+   eSrcMode = pThis->m_codecParam.m_Settings.tChParam[iLayerID].eSrcMode;
+   pThis->m_frameBuffersCount = pThis->m_codecParam.m_baseStreamCnt + 1 + pThis->m_codecParam.m_Settings.tChParam[iLayerID].tGopParam.uNumB;
+   int extStrideHeight = pThis->m_codecParam.m_heightAlignVal > 1 ? (frameInfo.iHeight + (pThis->m_codecParam.m_heightAlignVal - 1)) & ~(pThis->m_codecParam.m_heightAlignVal - 1) : -1;
+-  GetPixMapBufPollConfig(&pThis->m_SrcBufPoolConfig, &frameInfo, eSrcMode, pThis->m_frameBuffersCount, -1, extStrideHeight, pThis->m_codecParam.m_bUseExtraSrcBuffer);
++  stridew = (frameInfo.iWidth + 15) & ~15;
++  GetPixMapBufPollConfig(&pThis->m_SrcBufPoolConfig, &frameInfo, eSrcMode, pThis->m_frameBuffersCount, stridew, extStrideHeight, pThis->m_codecParam.m_bUseExtraSrcBuffer);
+   if (!PixMapBufPollInit(&pThis->m_SrcBufPool, g_pCodec->m_pAllocator, &pThis->m_SrcBufPoolConfig)) {
+     fprintf(stderr, "PixMapBufPollInit failed\n");
+     goto err_PixMapBufPollInit;
+diff --git a/T40/sdk/src/imp/video/alcodec/lib_jpeg_codec/lib_jpeg_codec.c b/T40/sdk/src/imp/video/alcodec/lib_jpeg_codec/lib_jpeg_codec.c
+index 2cc35e8..9ecd0cf 100644
+--- a/T40/sdk/src/imp/video/alcodec/lib_jpeg_codec/lib_jpeg_codec.c
++++ b/T40/sdk/src/imp/video/alcodec/lib_jpeg_codec/lib_jpeg_codec.c
+@@ -63,7 +63,7 @@ int alcodec_jpege_init(void **h, int picWidth, int picHight, int initQp)
+ 	codecOpt->codecFrameCnt = 0;
+ 
+ 	codecOpt->pCodecEncode = NULL;
+-	codecOpt->codecParam.m_heightAlignVal = -1;
++	codecOpt->codecParam.m_heightAlignVal = 16;
+ 	codecOpt->codecParam.m_Settings.tChParam[0].uEncWidth = codecOpt->runInfo.picWidth;
+ 	codecOpt->codecParam.m_Settings.tChParam[0].uEncHeight = codecOpt->runInfo.picHight;
+ 	codecOpt->codecParam.m_Settings.tChParam[0].uSrcWidth = codecOpt->runInfo.picWidth;
+diff --git a/T40/sdk/src/imp/video/framesource.h b/T40/sdk/src/imp/video/framesource.h
+index 82d2a68..22ab87a 100644
+--- a/T40/sdk/src/imp/video/framesource.h
++++ b/T40/sdk/src/imp/video/framesource.h
+@@ -21,6 +21,9 @@
+ extern "C" {
+ #endif
+ 
++#define I2D_ALIGNMENT 16
++#define ALIGN(d,a) (((d)+((a)-1))/(a)*(a))
++
+ typedef enum {
+ 	FSCHANNEL_STATE_CLOSE,
+ 	FSCHANNEL_STATE_OPEN,
+diff --git a/T41/drivers/audio/oss3/Makefile b/T41/drivers/audio/oss3/Makefile
+index d100fa0..5cea683 100644
+--- a/T41/drivers/audio/oss3/Makefile
++++ b/T41/drivers/audio/oss3/Makefile
+@@ -1,7 +1,7 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+ ifeq (${ISVP_ENV_KERNEL_DIR}, )
+-	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4.94
++	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4
+ 	#ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel
+ endif
+ 
+diff --git a/T41/drivers/i2c/sample_eeprom/Makefile b/T41/drivers/i2c/sample_eeprom/Makefile
+index 4c6b975..d7ae490 100644
+--- a/T41/drivers/i2c/sample_eeprom/Makefile
++++ b/T41/drivers/i2c/sample_eeprom/Makefile
+@@ -1,7 +1,7 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+ ifeq (${ISVP_ENV_KERNEL_DIR}, )
+-	ISVP_ENV_KERNEL_DIR = ../../../kernel
++	ISVP_ENV_KERNEL_DIR = ../../../kernel-4.4
+ endif
+ 
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+diff --git a/T41/drivers/isp-t41/tx-isp-t41/Makefile b/T41/drivers/isp-t41/tx-isp-t41/Makefile
+index 3a14a7a..4919d35 100644
+--- a/T41/drivers/isp-t41/tx-isp-t41/Makefile
++++ b/T41/drivers/isp-t41/tx-isp-t41/Makefile
+@@ -1,6 +1,5 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+-# ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4.94/
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+ 
+ ################### name define #########
+@@ -18,7 +17,7 @@ $(MODULE_NAME)-objs := libt41-firmware.a tx-isp-funcs.o tx-isp-module.o
+ obj-m := $(MODULE_NAME).o
+ 
+ modules:
+-	@if test "${ISVP_ENV_KERNEL_DIR}" = "${ISVP_ENV_TOP}/opensource/kernel-4.4.94";then \
++	@if test "${ISVP_ENV_KERNEL_DIR}" = "${ISVP_ENV_TOP}/../kernel-4.4";then \
+ 		echo "现在正在编译toolchain:720r511 kernel:4.4.94 的ko."; \
+ 		cp libt41-firmware-4494.a libt41-firmware.a; \
+ 	else \
+diff --git a/T41/drivers/sensors-t41/gc4663/Makefile b/T41/drivers/sensors-t41/gc4663/Makefile
+index 5f7426b..8603f1b 100755
+--- a/T41/drivers/sensors-t41/gc4663/Makefile
++++ b/T41/drivers/sensors-t41/gc4663/Makefile
+@@ -1,7 +1,7 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+ ifeq (${ISVP_ENV_KERNEL_DIR}, )
+-	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4.94
++	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4
+ endif
+ 
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+diff --git a/T41/drivers/sensors-t41/sc8238/Makefile b/T41/drivers/sensors-t41/sc8238/Makefile
+index 5f7426b..8603f1b 100644
+--- a/T41/drivers/sensors-t41/sc8238/Makefile
++++ b/T41/drivers/sensors-t41/sc8238/Makefile
+@@ -1,7 +1,7 @@
+ CROSS_COMPILE ?= mips-linux-gnu-
+ 
+ ifeq (${ISVP_ENV_KERNEL_DIR}, )
+-	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4.94
++	ISVP_ENV_KERNEL_DIR = $(PWD)/../../../kernel-4.4
+ endif
+ 
+ KDIR := ${ISVP_ENV_KERNEL_DIR}
+diff --git a/T41/uboot/include/configs/isvp_t41.h b/T41/uboot/include/configs/isvp_t41.h
+index a0513cf..17a9885 100644
+--- a/T41/uboot/include/configs/isvp_t41.h
++++ b/T41/uboot/include/configs/isvp_t41.h
+@@ -53,8 +53,8 @@
+ #define APLL_1008M
+ #define DDR_550M
+ #else
+-#define APLL_1104M
+-#define DDR_750M
++#define APLL_1300M
++#define DDR_800M
+ #endif
+ #elif defined(CONFIG_T41L)
+ /* T41L */
+@@ -63,7 +63,7 @@
+ #define DDR_550M
+ #else
+ #define APLL_1104M
+-#define DDR_600M
++#define DDR_650M
+ #endif
+ #elif defined(CONFIG_T41A)
+ /* T41A */
+@@ -436,9 +436,9 @@
+  * Boot arguments definitions.
+  */
+ #if defined(CONFIG_T41N)
+-#define BOOTARGS_COMMON "console=ttyS1,115200n8 mem=48M@0x0 rmem=64M@0x3000000 nmem=16M@0x7000000"
++#define BOOTARGS_COMMON "console=ttyS1,115200n8 mem=64M@0x0 rmem=48M@0x4000000 nmem=16M@0x7000000"
+ #elif defined(CONFIG_T41L)
+-#define BOOTARGS_COMMON "console=ttyS1,115200n8 mem=32M@0x0 rmem=32M@0x2000000"
++#define BOOTARGS_COMMON "console=ttyS1,115200n8 mem=47M@0x0 rmem=17M@0x2F00000"
+ #elif defined(CONFIG_T41A)
+ #define BOOTARGS_COMMON "console=ttyS1,115200n8 mem=100M@0x0 rmem=128M@0x6400000 nmem=28M@0xE400000"
+ #else

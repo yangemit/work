@@ -1,0 +1,20 @@
+#!/bin/sh
+insmod /system/lib/modules/avpu.ko
+insmod /system/lib/modules/audio.ko
+insmod /system/lib/modules/tx-isp-t31.ko isp_clk=150000000
+# insmod /system/lib/modules/tx-isp-t31.ko isp_clk=200000000
+# insmod /system/lib/modules/sensor_sc4335_t31.ko
+insmod /system/lib/modules/sensor_jxf23_t31.ko
+insmod /system/lib/modules/videobuf2-vmalloc.ko
+insmod /system/lib/modules/libcomposite.ko
+insmod /system/lib/modules/usbcamera.ko
+
+cd /system/bin/
+/system/bin/anticopy ucamera
+/system/bin/ucamera &
+# sleep 3
+
+# /system/bin/adbd &
+#sh /system/init/connect_nfs.sh
+#sleep 2
+#mytest_20200323

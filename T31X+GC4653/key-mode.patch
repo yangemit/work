@@ -1,0 +1,2364 @@
+diff --git a/Makefile b/Makefile
+index f6b2090..c38cf20 100644
+--- a/Makefile
++++ b/Makefile
+@@ -11,7 +11,7 @@ AR = $(CROSS_COMPILE)ar cr
+ STRIP = $(CROSS_COMPILE)strip
+ 
+ HOST := T31
+-MODULE_FACEZOOM := disable
++MODULE_FACEZOOM :=enable
+ MODULE_TRACK := disable
+ 
+ ###########
+@@ -49,10 +49,16 @@ LIBS += -L$(MODULE_AF_DIR) -laf
+ MODULES += module_af
+ MODULES_CLEAN += module_af_clean
+ 
+-MODULE_LED_DIR := $(MODULES_PATH)/module_led
+-LIBS += -L$(MODULE_LED_DIR) -lled
+-MODULES += module_led
+-MODULES_CLEAN += module_led_clean
++#MODULE_LED_DIR := $(MODULES_PATH)/module_led
++#LIBS += -L$(MODULE_LED_DIR) -lled
++#MODULES += module_led
++#MODULES_CLEAN += module_led_clean
++
++MODULE_KEY_DIR := $(MODULES_PATH)/module_key
++LIBS += -L$(MODULE_KEY_DIR) -lkey_gpio
++MODULES += module_key
++MODULES_CLEAN += module_key_clean
++
+ 
+ ifeq ($(MODULE_FACEZOOM), enable)
+ MODULE_FACEZOOM_DIR := $(MODULES_PATH)/module_facezoom
+@@ -121,7 +127,7 @@ INCLUDES =	-I$(LIBS_DIR)/anticopy/include \
+ 		-I$(SDK_DIR)/include \
+ 		-I$(UTILS_DIR)/include \
+ 		-I$(SRC_DIR)/include \
+-		-I$(SRC_DIR)/
++		-I$(SRC_DIR)/    
+ 
+ LIBS += 	-L$(SDK_DIR)/lib/$(COMPILE_TYPE) -limp \
+ 		-L$(SDK_DIR)/lib/$(COMPILE_TYPE) -lalog \
+@@ -160,11 +166,16 @@ module_af:
+ module_af_clean:
+ 	make -C $(MODULE_AF_DIR) clean
+ 
+-module_led:
+-	make -C $(MODULE_LED_DIR)
++#module_led:
++#	make -C $(MODULE_LED_DIR)
++
++#module_led_clean:
++#	make -C $(MODULE_LED_DIR) clean
++module_key:
++	make -C $(MODULE_KEY_DIR)
+ 
+-module_led_clean:
+-	make -C $(MODULE_LED_DIR) clean
++module_key_clean:
++	make -C $(MODULE_KEY_DIR) clean
+ 
+ ifeq ($(MODULE_FACEZOOM), enable)
+ module_facezoom:
+diff --git a/src/common/imp-common.c b/src/common/imp-common.c
+old mode 100644
+new mode 100755
+index 6b4e949..b785f4a
+--- a/src/common/imp-common.c
++++ b/src/common/imp-common.c
+@@ -44,8 +44,12 @@
+ /* #include <ivs/ivs_inf_person_tracker.h> */
+ #endif
+ 
++
+ #define TAG "IMP-COMMON"
+ 
++
++static IMPRgnHandle osd_hander[1] ;
++
+ typedef struct _imp_common_attr {
+ 	int sensor_width;
+ 	int sensor_height;
+@@ -100,6 +104,7 @@ struct chn_conf chn[FS_CHN_NUM] = {
+ 		   },
+ 		.framesource_chn =	{ DEV_ID_FS, CH0_INDEX, 0},
+ 		.imp_encoder = { DEV_ID_ENC, CH0_INDEX, 0},
++		.imp_osd = {DEV_ID_OSD,CH0_INDEX,0},
+ 	},
+ 	{
+ 		.index = CH1_INDEX,
+@@ -654,6 +659,525 @@ int sample_encoder_exit(int chn_num)
+ 
+     return 0;
+ }
++//#################ivs-osd############################
++
++extern int osd_width;
++extern int osd_height;
++
++int set_osd_ivs_switch(int on_off)
++{
++	int ret = -1;
++
++	ret = IMP_OSD_ShowRgn(osd_hander[0], OSD_CONTROL_GROUP, on_off);
++	if (ret != 0) {
++		printf("ERROR(%s): IMP_OSD_ShowRgn() error\n",TAG);
++		return -1;
++	}
++
++	return 0;
++}
++
++static int init_face_box_osd(int grp_num)
++{
++	int ret = -1;
++	IMPOSDGrpRgnAttr grAttr;
++	IMPOSDRgnAttr rAttr;
++
++	if (IMP_OSD_CreateGroup(grp_num) < 0) {
++		printf("ERROR(%s): IMP_OSD_CreateGroup(%d) error !\n", TAG, grp_num);
++		return -1;
++	}
++
++	for(int i = 0; i < OSD_HANDLE_NUM; i++){
++
++		osd_hander[i] = IMP_OSD_CreateRgn(NULL);
++		if (osd_hander[i] == INVHANDLE) {
++			printf("ERROR(%s): IMP_OSD_CreateRgn Logo error!\n", TAG);
++			return -1;
++		}
++
++		ret = IMP_OSD_RegisterRgn(osd_hander[i], grp_num, NULL);
++		if (ret < 0) {
++			printf("ERROR(%s): IVS IMP_OSD_RegisterRgn failed\n", TAG);
++			return -1;
++		}
++		
++		memset(&rAttr, 0, sizeof(IMPOSDRgnAttr));
++	
++		rAttr.type = OSD_REG_COVER;
++		rAttr.rect.p0.x = 0;
++		rAttr.rect.p0.y = 0;
++		rAttr.rect.p1.x = osd_width -1;
++		rAttr.rect.p1.y = osd_height -1 ;
++		rAttr.fmt = PIX_FMT_BGRA;//PIX_FMT_MONOWHITE
++		rAttr.data.coverData.color = OSD_BLACK;
++		ret = IMP_OSD_SetRgnAttr(osd_hander[i], &rAttr);
++		if (ret < 0) {
++			printf("ERROR(%s), IMP_OSD_SetRgnAttr Rect error !\n", TAG);
++			return -1;
++		}
++
++		ret = IMP_OSD_GetGrpRgnAttr(osd_hander[i], grp_num, &grAttr);
++		if (ret < 0) {
++			printf("ERROR(%s): IMP_OSD_GetGrpRgnAttr Logo error!\n", TAG);
++			return -1;
++		}
++		memset(&grAttr, 0, sizeof(IMPOSDGrpRgnAttr));
++		grAttr.layer = 2;
++		grAttr.show = 0;
++		grAttr.gAlphaEn = 1;
++		grAttr.fgAlhpa = 0xff;
++
++		ret = IMP_OSD_SetGrpRgnAttr(osd_hander[i], grp_num, &grAttr);
++		if (ret < 0) {
++			printf("ERROR(%s): IMP_OSD_SetGrpRgnAttr Logo error!\n", TAG);
++			return -1;
++		}
++
++		ret = IMP_OSD_ShowRgn(osd_hander[i], grp_num, 0);
++		if (ret != 0) {
++			printf("ERROR(%s): IMP_OSD_ShowRgn() Logo error\n",TAG);
++			return -1;
++		}
++	}
++
++	ret = IMP_OSD_Start(grp_num);
++	if (ret < 0) {
++		printf("ERROR(%s),IMP_OSD_Start Rect error !\n",TAG);
++		return -1;
++	}
++
++	return 0;
++}
++
++static int osd_init_ivs(void)
++{
++	int ret = -1;
++
++	ret = init_face_box_osd(0);
++	if (ret < 0) {
++		printf("ERROR(%s): init four corner osd failed. \n", TAG);
++		return -1;
++	}
++
++	return 0;
++}
++
++static int osd_exit(void)
++{
++	int ret = -1;
++	int i = 0;
++
++	for (i = 0; i < OSD_HANDLE_NUM; i++) {
++		/* close region */
++		ret = IMP_OSD_ShowRgn(osd_hander[i], 0, 0);
++		if (ret < 0) {
++			printf("ERROR(%s): IMP_OSD_ShowRgn close error\n", TAG);
++			return -1;
++		}
++
++		/* unregister region */
++		ret = IMP_OSD_UnRegisterRgn(osd_hander[i], 0);
++		if (ret < 0) {
++			printf("ERROR(%s): IMP_OSD_UnRegisterRgn error\n", TAG);
++			return -1;
++		}
++
++		/* destroy region */
++		IMP_OSD_DestroyRgn(osd_hander[i]);
++	}
++
++	ret = IMP_OSD_DestroyGroup(0);
++	if (ret < 0) {
++		printf("ERROR(%s): IMP_OSD_DestroyGroup(%d) error\n",TAG, 0);
++		return -1;
++	}
++ 
++	return 0;
++}
++
++
++int module_osd_control_init(void)
++{
++	int ret = -1;
++
++	ret = osd_init_ivs();
++	if (ret) {
++		printf("ERROR(%s): osd_init error!\n", TAG);
++		return -1;
++	}
++	printf("%s...OK\n",__func__);
++
++	return 0;
++}
++
++int module_osd_control_deinit(void)
++{
++	int ret = -1;
++
++	ret = osd_exit();
++	if (ret < 0) {
++		printf("ERROR:(%s) osd exit error! \n",TAG);
++		return -1;
++	}
++
++	printf("%s...OK\n",__func__);
++	return 0;
++}
++
++
++int IVS_OSD_Init(int grp_num)
++{
++	int ret = 0;
++
++	ret = IMP_IVS_CreateGroup(grp_num);
++	if (ret < 0) {
++		printf("IMP_IVS_CreateGroup(%d) failed\n", grp_num);
++		return -1;
++	}
++	return 0;
++}
++
++
++typedef struct {
++	IMPFrameInfo    frameInfo;                         /**< 帧尺寸信息,只需要配置width和height */
++	IMPFrameInfo    *result;
++} IVS_OSD_BaseParam_t;
++
++static int BaseLCDOSDInit(IMPIVSInterface *inf)
++{
++       /* inf->param = calloc(1, sizeof(IVS_OSD_BaseParam_t));*/
++	/*printf("#$#$#$#$#$#$# %s:%d -> %p\n", __func__, __LINE__, inf->param);*/
++	return 0;
++}
++
++static void BaseLCDOSDExit(IMPIVSInterface *inf)
++{
++       /* if(inf->param != NULL){*/
++	
++		/*free(inf->param);*/
++		/*inf->param = NULL;*/
++	/*}*/
++	/*printf("#$#$#$#$#$#$# %s:%d -> %p\n", __func__, __LINE__, inf->param);*/
++	return;
++}
++
++static int BaseLCDOSDPreprocessSync(IMPIVSInterface *inf, IMPFrameInfo *frame)
++{
++	return 0;
++}
++
++
++static int BaseLCDOSDProcessAsync(IMPIVSInterface *inf, IMPFrameInfo *frame)
++{
++	int ret = 0;
++#if 0
++	int fd = 0;
++	printf("========= Frame info: addr:[%p], w: %d, h: %d\n", frame->virAddr, frame->width, frame->height);
++	if (!wf) {
++		fd = open("./lcdosd.rbg", O_RDWR | O_CREAT | O_APPEND, 0777);
++		if(fd < 0) {
++			IMP_LOG_ERR(TAG, "fd error !\n");
++			return -1;
++		}
++
++		write(fd, (void *)frame->virAddr, frame->width * frame->height);
++
++		close(fd);
++		wf = 1;
++	}
++#endif
++	((IVS_OSD_BaseParam_t *)(inf->param))->result = frame;
++	return ret;
++}
++
++static int BaseLCDOSDGetResult(IMPIVSInterface *inf, void **result)
++{
++	*result = (void *)((IVS_OSD_BaseParam_t *)(inf->param))->result;
++	return 0;
++}
++
++static int BaseLCDOSDReleaseResult(IMPIVSInterface *inf, void *result)
++{
++
++	IMPFrameInfo *frame = ((IVS_OSD_BaseParam_t *)(inf->param))->result;
++	IMP_IVS_ReleaseData((void *)frame->virAddr);
++	return 0;
++}
++
++static int BaseLCDOSDGetParam(IMPIVSInterface *inf, void *param)
++{
++	return 0;
++}
++
++static int BaseLCDOSDSetParam(IMPIVSInterface *inf, void *param)
++{
++	return 0;
++}
++
++static int BaseLCDOSDFlushFrame(IMPIVSInterface *inf)
++{
++	return 0;
++}
++
++IMPIVSInterface *baseMoveInterface = NULL;
++IMPIVSInterface *IMP_IVS_CreateBaseIVSOSDInterface(IVS_OSD_BaseParam_t *param)
++{
++#if 1
++	baseMoveInterface = calloc(1, sizeof(IMPIVSInterface) + sizeof(IVS_OSD_BaseParam_t));
++	if (NULL == baseMoveInterface) {
++		printf("calloc baseMoveInterface is NULL!\n");
++		return NULL;
++	}
++
++	baseMoveInterface->param = (char*)baseMoveInterface + sizeof(IMPIVSInterface);
++	memcpy(baseMoveInterface->param, param, sizeof(IVS_OSD_BaseParam_t));
++#endif
++	baseMoveInterface->paramSize = sizeof(IVS_OSD_BaseParam_t);
++	baseMoveInterface->pixfmt = PIX_FMT_BGRA;
++	baseMoveInterface->init = BaseLCDOSDInit;
++	baseMoveInterface->exit = BaseLCDOSDExit;
++	baseMoveInterface->preProcessSync = BaseLCDOSDPreprocessSync;
++
++	baseMoveInterface->processAsync = BaseLCDOSDProcessAsync;
++	baseMoveInterface->getResult    = BaseLCDOSDGetResult;
++	baseMoveInterface->releaseResult= BaseLCDOSDReleaseResult;
++	baseMoveInterface->getParam     = BaseLCDOSDGetParam;
++	baseMoveInterface->setParam     = BaseLCDOSDSetParam;
++	baseMoveInterface->flushFrame   = BaseLCDOSDFlushFrame;
++
++	return baseMoveInterface;
++}
++
++
++int IVS_OSD_InterfaceInit(int grp_num, int chn_num, IMPIVSInterface **interface) {
++
++	int ret = 0;
++	IVS_OSD_BaseParam_t param;
++
++	memset(&param, 0, sizeof(IVS_OSD_BaseParam_t));
++#if 1
++	param.frameInfo.width = osd_width;
++	param.frameInfo.height = osd_height;
++#endif
++	printf("osd_width = %d  osd_height = %d \n", param.frameInfo.width, param.frameInfo.height);
++
++	*interface = IMP_IVS_CreateBaseIVSOSDInterface(&param);
++	if (*interface == NULL) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_CreateGroup(%d) failed\n", grp_num);
++		return -1;
++	}
++
++	ret = IMP_IVS_CreateChn(chn_num, *interface);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_CreateChn(%d) failed\n", chn_num);
++		return -1;
++	}
++
++	ret = IMP_IVS_RegisterChn(grp_num, chn_num);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_RegisterChn(%d, %d) failed\n", grp_num, chn_num);
++		return -1;
++	}
++
++	ret = IMP_IVS_StartRecvPic(chn_num);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_StartRecvPic(%d) failed\n", chn_num);
++		return -1;
++	}
++
++	return 0;
++}
++
++
++int IVS_OSD_Start(void) {
++
++	IMPIVSInterface *interface;
++	IVS_OSD_InterfaceInit(1, 1, &interface); 
++	return 0;
++}
++
++int IVS_OSD_InterfaceDeinit(int grp_num, int chn_num)
++{
++	int ret;
++
++	ret = IMP_IVS_StopRecvPic(chn_num);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_StopRecvPic(%d) failed\n", chn_num);
++		return -1;
++	}
++	sleep(1);
++
++	ret = IMP_IVS_UnRegisterChn(chn_num);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_UnRegisterChn(%d) failed\n", chn_num);
++		return -1;
++	}
++
++	ret = IMP_IVS_DestroyChn(chn_num);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_DestroyChn(%d) failed\n", chn_num);
++		return -1;
++	}
++
++	ret = IMP_IVS_DestroyGroup(grp_num);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_IVS_DestroyGroup(1) failed\n");
++		return -1;
++	}
++
++	return 0;
++}
++
++int IVS_OSD_Stop(void) {
++
++	IVS_OSD_InterfaceDeinit(1, 1); 
++	if (baseMoveInterface != NULL) {
++	
++		free(baseMoveInterface);
++		baseMoveInterface = NULL;
++	}
++	return 0;
++}
++//########################end ivs-osd ########################
++
++//############################osd ############################
++
++IMPRgnHandle *sample_osd_init(int grpNum)
++{
++	int ret = 0;
++	int i = 0;
++	IMPRgnHandle *prHander = NULL;
++
++	prHander = malloc(OSD_HANDLE_NUM * sizeof(IMPRgnHandle));
++	if (prHander <= 0) {
++		IMP_LOG_ERR(TAG, "malloc() error !\n");
++		return NULL;
++	}
++
++	for(i = 0; i < OSD_HANDLE_NUM;i++){
++	prHander[i] = IMP_OSD_CreateRgn(NULL);
++	if (prHander[i] == INVHANDLE) {
++		IMP_LOG_ERR(TAG, "IMP_OSD_CreateRgn TimeStamp error %d !\n",i);
++		return NULL;
++	}
++	//query osd rgn create status
++	/*IMPOSDRgnCreateStat stStatus;
++	memset(&stStatus,0x0,sizeof(IMPOSDRgnCreateStat));
++	ret = IMP_OSD_RgnCreate_Query(prHander[i],&stStatus);
++	if(ret < 0){
++		IMP_LOG_ERR(TAG, "IMP_OSD_RgnCreate_Query error !\n");
++		return NULL;
++	}*/
++
++
++	ret = IMP_OSD_RegisterRgn(prHander[i], grpNum, NULL);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IVS IMP_OSD_RegisterRgn failed\n");
++		return NULL;
++	}
++
++	//query osd rgn register status
++	/*IMPOSDRgnRegisterStat stRigStatus;
++	memset(&stRigStatus,0x0,sizeof(IMPOSDRgnRegisterStat));
++	ret = IMP_OSD_RgnRegister_Query(prHander[i], grpNum,&stRigStatus);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_OSD_RgnRegister_Query failed\n");
++		return NULL;
++	}*/
++
++	
++	IMPOSDRgnAttr rAttrCover;
++	memset(&rAttrCover, 0, sizeof(IMPOSDRgnAttr));
++	rAttrCover.type = OSD_REG_COVER;
++	rAttrCover.rect.p0.x = 0;
++	rAttrCover.rect.p0.y = 0;
++	rAttrCover.rect.p1.x = rAttrCover.rect.p0.x+40 -1;
++	rAttrCover.rect.p1.y = rAttrCover.rect.p0.y+10 -1 ;
++	rAttrCover.fmt = PIX_FMT_BGRA;
++	rAttrCover.data.coverData.color = OSD_BLACK;
++	ret = IMP_OSD_SetRgnAttr(prHander[i], &rAttrCover);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_OSD_SetRgnAttr Cover error !\n");
++		return NULL;
++	}
++	IMPOSDGrpRgnAttr grAttrCover;
++
++	if (IMP_OSD_GetGrpRgnAttr(prHander[i], grpNum, &grAttrCover) < 0) {
++		IMP_LOG_ERR(TAG, "IMP_OSD_GetGrpRgnAtt:r Cover error !\n");
++		return NULL;
++
++	}
++	memset(&grAttrCover, 0, sizeof(IMPOSDGrpRgnAttr));
++	grAttrCover.gAlphaEn = 1;
++	grAttrCover.fgAlhpa = 0xff;
++	grAttrCover.layer = 2;
++	
++	/* Disable Cover global alpha, it is absolutely no transparent. */
++	if (IMP_OSD_SetGrpRgnAttr(prHander[i], grpNum, &grAttrCover) < 0) {
++		IMP_LOG_ERR(TAG, "IMP_OSD_SetGrpRgnAttr Cover error !\n");
++		return NULL;
++	}
++
++
++
++	ret = IMP_OSD_Start(grpNum);
++	if (ret < 0) {
++		IMP_LOG_ERR(TAG, "IMP_OSD_Start TimeStamp, Logo, Cover and Rect error !\n");
++		return NULL;
++	}
++}
++	return prHander;
++}
++
++int osd_show(IMPRgnHandle *prHander,int grpNum)
++{
++	int ret;
++
++	ret = IMP_OSD_ShowRgn(prHander[0], grpNum, 1);
++	if (ret != 0) {
++		IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");
++		return -1;
++	}
++	
++	return 0;
++}
++
++int sample_osd_exit(IMPRgnHandle *prHander,int grpNum)
++ 	{
++		int ret;
++		int i ;
++		for(i = 0; i < OSD_HANDLE_NUM ;i++)
++		{
++			//反区显示
++			ret = IMP_OSD_ShowRgn(prHander[i], grpNum, 0);
++			if (ret < 0) {
++				IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn close timeStamp error\n");
++			}
++
++			//反注册
++			ret = IMP_OSD_UnRegisterRgn(prHander[i], grpNum);
++			if (ret < 0) {
++				IMP_LOG_ERR(TAG, "IMP_OSD_UnRegisterRgn timeStamp error\n");
++			}
++			//摧毁区
++			IMP_OSD_DestroyRgn(prHander[i]);
++		}
++		//摧毁组
++		ret = IMP_OSD_DestroyGroup(grpNum);
++		if (ret < 0) {
++			IMP_LOG_ERR(TAG, "IMP_OSD_DestroyGroup(0) error\n");
++			return -1;
++		}
++		free(prHander);
++		prHander = NULL;
++
++		return 0;
++	}
++	
++//############################osd################################
++
++
+ static int get_stream(char *buf, IMPEncoderStream *stream)
+ {
+ 	int i, len = 0;
+@@ -703,6 +1227,59 @@ int frame_bitrate_show(IMPEncoderStream *stream)
+ 		return 0;
+ }
+ #endif
++//##############################黑图#########################
++int sample_get_black(char *buf)
++{
++	FILE *fp;
++	int size = 0;
++	//二进制方式打开文件
++	fp = fopen("/system/config/osd.config","rb");
++	if(NULL == fp)
++	{
++		printf("Error:Open input.c file fail!\n");
++		return -1;
++	}
++ 
++	//求得文件的大小
++	/*fseek(fp, 0, SEEK_END);
++	size = ftell(fp);
++	memset(buf,0,size);
++	printf("#####size %d ######\n",size);
++	rewind(fp);*/
++	
++	//求得文件的大小变动
++	//fseek(fp, 0, SEEK_END);
++	size = osd_width * osd_height * 2;
++	memset(buf,0,size);
++	//printf("#####size %d ######\n",size);
++	//rewind(fp);
++	//读文件
++	fread(buf,1,size,fp);//每次读一个，共读size次
++ 
++	fclose(fp);
++	
++	return size;
++}
++//##############################end 黑图#########################
++//拿取黑图
++// int sample_set_black(char *buf,int len)
++// {
++	// FILE *fp;
++ 
++	// //二进制方式打开文件
++	// fp = fopen("/system/config/snap-1.bin","wb");
++	// if(NULL == fp)
++	// {
++		// printf("Error:Open input.c file fail!\n");
++		// return -1;
++	// }
++
++	// //读文件
++	// fwrite(buf,1,len,fp);//每次读一个，共读size次
++ 
++	// fclose(fp);
++	// return 0;
++// }
+ 
+ int sample_get_h264_snap(int chn_num, char *img_buf)
+ {
+@@ -741,7 +1318,6 @@ int sample_get_jpeg_snap(int chn_num, char *img_buf)
+ 
+ 	i = chn_num;
+ 	if (chn[i].enable) {
+-
+ 		/* Polling JPEG Snap, set timeout as 1000msec */
+ 		ret = IMP_Encoder_PollingStream(3 + chn[i].index, 10000);
+ 		if (ret < 0) {
+@@ -756,10 +1332,13 @@ int sample_get_jpeg_snap(int chn_num, char *img_buf)
+ 				IMP_LOG_ERR(TAG, "IMP_Encoder_GetStream() failed\n");
+ 				return -1;
+ 			}
+-
++			
+ 			len = get_stream(img_buf, &stream);
+-
++			
++			//printf("########## len %d \n ",len);
++			
+ 			IMP_Encoder_ReleaseStream(3 + chn[i].index, &stream);
++	 
+ #ifdef SHOW_FRM_BITRATE
+ 			frame_bitrate_show(&stream);
+ #endif
+@@ -790,28 +1369,85 @@ void nv12toyuy2(char * image_in, char* image_out, int width, int height)
+         }
+     return;
+ }
+-
++//#################yuy2 黑图开关###############
++static int yuyv_switch = 0;
++void set_yuyv_switch(int on_off)
++{
++	yuyv_switch = on_off;
++}
++//############################################
++int cap_cnt = 0; //nv12->yuy2 图像保存/tmp/
+ int sample_get_yuv_snap(int chn_num, char *img_buf)
+ {
+ 	int ret , len = 0;
+ 	IMPFrameInfo *frame_bak;
+ 	IMPFSChnAttr *imp_chn_attr_tmp;
+-
++	
+ 	imp_chn_attr_tmp = &chn[chn_num].fs_chn_attr;
+-	ret = IMP_FrameSource_GetFrame(chn_num, &frame_bak);
+-    	if (ret < 0) {
+-		IMP_LOG_ERR(TAG, "%s(%d):IMP_FrameSource_GetFrame failed\n", __func__, __LINE__);
+-		return -1;
+-    	}
+-	len = imp_chn_attr_tmp->picWidth *imp_chn_attr_tmp->picHeight *2;
+-	nv12toyuy2((char *)frame_bak->virAddr, img_buf, imp_chn_attr_tmp->picWidth, imp_chn_attr_tmp->picHeight);
+-	//len = frame_bak->size;
+-	//memcpy(img_buf, frame_bak->virAddr, len);
+-	IMP_FrameSource_ReleaseFrame(chn_num, frame_bak);
+-	if (ret < 0) {
+-		IMP_LOG_ERR(TAG, "%s(%d):IMP_FrameSource_ReleaseFrame failed\n", __func__, __LINE__);
+-		return -1;
++	if(yuyv_switch == 0){
++	#if 0    //ivs-osd enable
++		ret = IMP_IVS_PollingResult(1, -1);
++		if (ret < 0) {
++			IMP_LOG_ERR(TAG, "IMP_IVS_PollingResult failed\n");
++			return -1;
++		}
++		ret = IMP_IVS_GetResult(1, (void *)&frame_bak);
++		if (ret < 0) {
++			IMP_LOG_ERR(TAG, "IMP_IVS_GetResult failed\n");
++			return -1;
++		}
++	#else 
++		ret = IMP_FrameSource_GetFrame(chn_num, &frame_bak);
++			if (ret < 0) {
++			IMP_LOG_ERR(TAG, "%s(%d):IMP_FrameSource_GetFrame failed\n", __func__, __LINE__);
++			return -1;
++			}
++	#endif
++		len = imp_chn_attr_tmp->picWidth *imp_chn_attr_tmp->picHeight *2;
++		
++		if(cap_cnt == 1) {
++
++			int fd0 = open("/tmp/osd.nv12", O_RDWR | O_CREAT, 0777);
++			if(fd0 < 0) {
++				IMP_LOG_ERR(TAG, "fd error !\n");
++				return -1;
++			}
++
++			write(fd0, (void *)frame_bak->virAddr, frame_bak->width * frame_bak->height * 3 / 2);
++
++			close(fd0);
++		}
++		nv12toyuy2((char *)frame_bak->virAddr, img_buf, imp_chn_attr_tmp->picWidth, imp_chn_attr_tmp->picHeight);
++		if(cap_cnt == 1) {
++			int fd1 = open("/tmp/osd.yuy2", O_RDWR | O_CREAT, 0777);
++			if(fd1 < 0) {
++				IMP_LOG_ERR(TAG, "fd1 error !\n");
++				return -1;
++			}
++
++			write(fd1, img_buf, frame_bak->width * frame_bak->height * 2);
++
++			close(fd1);
++		}
++		cap_cnt = 0;
++		//len = frame_bak->size;
++		//memcpy(img_buf, frame_bak->virAddr, len);
++	#if 0 //ivs-osd enable
++		ret = IMP_IVS_ReleaseResult(1, (void *)&frame_bak);
++		if (ret < 0) {
++			IMP_LOG_ERR(TAG, "IMP_IVS_ReleaseResult(%d) failed\n", 1);
++			return -1;
++		}
++	#else
++		IMP_FrameSource_ReleaseFrame(chn_num, frame_bak);
++		if (ret < 0) {
++			IMP_LOG_ERR(TAG, "%s(%d):IMP_FrameSource_ReleaseFrame failed\n", __func__, __LINE__);
++			return -1;
++		}
++	}else{
++			len = sample_get_black(img_buf);
+ 	}
++#endif
+ 	return len;
+ }
+ 
+@@ -1025,6 +1661,12 @@ void sample_audio_amic_init(int vol, int audio_ns)
+         return;
+     }
+ 
++/*    ret = IMP_AI_EnableAec(devID, chnID, 0, 0); */
++    /*if(ret != 0) {*/
++	    /*IMP_LOG_ERR(TAG, "Audio Record enable AEC failed\n");*/
++	    /*return;*/
++    /*}*/
++
+     /* Step 5: Set audio channel volume. */
+     int chnVol = vol;
+     chnVol = 1.2 * vol - 30;
+@@ -1065,7 +1707,9 @@ void sample_audio_amic_init(int vol, int audio_ns)
+ 		    printf("enable audio ns error.\n");
+ 		    IMP_LOG_INFO(TAG, "enable audio ns error.\n");
+ 		    return ;
++		    printf("########### audio_ns #############");
+ 	    }
++	    
+ 
+     }
+ 
+diff --git a/src/common/load_config.c b/src/common/load_config.c
+index 02ea28e..afea55d 100644
+--- a/src/common/load_config.c
++++ b/src/common/load_config.c
+@@ -116,7 +116,7 @@ config_func_param_t g_func_param = {
+ #ifdef MODULE_FACEZOOM_ENABLE
+ 	.facezoom_param = {
+ 		.facezoom_en = 1,
+-		.facezoom_mode = 2,
++		.facezoom_mode = 1,
+ 	},
+ #endif
+ 
+diff --git a/src/common/thread_process.c b/src/common/thread_process.c
+old mode 100644
+new mode 100755
+index a4b1754..efe4ce6
+--- a/src/common/thread_process.c
++++ b/src/common/thread_process.c
+@@ -10,7 +10,7 @@
+ #include <pthread.h>
+ #include <sys/prctl.h>
+ 
+-#include <module_led_control.h>
++//#include <module_led_control.h>
+ #include <module_ucamera_control.h>
+ #ifdef MOTOR_TRACK_ENABLE
+ #include <module_track_control.h>
+@@ -19,16 +19,17 @@
+ #include <module_face_zoom.h>
+ #endif
+ #include <imp-common.h>
++#include "main.h"
+ #include "global_config.h"
+ 
+ #define MOTAG_TAG            "KIVA_PROCRSS"
+ 
+-static pthread_t led_pid;
++//static pthread_t led_pid;
+ static pthread_t dyn_pid;
+ 
+ static int g_fps_num;
+ 
+-static void *led_control_process(void *arg)
++/*static void *led_control_process(void *arg)
+ {
+ 	int stream_on = 0;
+ 	led_ctl_t *led_ctl = (led_ctl_t *)arg;
+@@ -41,12 +42,11 @@ static void *led_control_process(void *arg)
+ 		} else {
+ 			module_led_ctl(led_ctl->gpio, !led_ctl->level);
+ 		}
+-
+ 		usleep(100 * 1000);
+ 	}
+ 
+ 	return NULL;
+-}
++}*/
+ 
+ static int imp_sensor_fps_adapture()
+ {
+@@ -160,11 +160,12 @@ void *osd_show_process(void *arg)
+ #ifdef MODULE_FACEZOOM_ENABLE
+ static int face_zoom_stop = 0;
+ static pthread_t fz_pid;
++extern int key_type;
+ void *face_zoom_control_process(void *none)
+ {
+ 	uint8_t fz_status = 0;
+ 	int ret = -1;
+-
++	
+ 	prctl(PR_SET_NAME, "face_zoom_control");
+ 	while(!face_zoom_stop)
+ 	{
+@@ -194,6 +195,7 @@ void *face_zoom_control_process(void *none)
+ 					printf("INFO(%s): module_facezoom_deinit ...ok\n", MOTAG_TAG);
+ 
+ 					module_ucamera_post_fs();
++					key_type = 0;
+ 					fz_status = 0;
+ 				}
+ 				break;
+@@ -220,7 +222,7 @@ int kiva_process_init(void *param)
+ 	g_fps_num = cfg_param->isp_attr.fps_num;
+ 
+ 	/* start osd clean thread */
+-	pthread_attr_t led_attr;
++/*	pthread_attr_t led_attr;
+ 	pthread_attr_init(&led_attr);
+ 	pthread_attr_setdetachstate(&led_attr, PTHREAD_CREATE_DETACHED);
+ 	pthread_attr_setschedpolicy(&led_attr, SCHED_OTHER);
+@@ -229,7 +231,7 @@ int kiva_process_init(void *param)
+ 		printf("ERROR(%s): create thread for led control failed!\n", MOTAG_TAG);
+ 		return -1;
+ 	}
+-
++*/
+ 	if (cfg_param->isp_attr.dynamic_fps) {
+ 		/* start osd clean thread */
+ 		pthread_attr_t dyn_attr;
+@@ -275,7 +277,7 @@ int kiva_process_init(void *param)
+ 
+ void kiva_process_deinit()
+ {
+-	pthread_cancel(led_pid);
++//	pthread_cancel(led_pid);
+ 	pthread_cancel(dyn_pid);
+ #ifdef OSD_CONTROL
+ 	pthread_cancel(osd_pid);
+diff --git a/src/global_config.h b/src/global_config.h
+old mode 100644
+new mode 100755
+index c15d022..e7d9692
+--- a/src/global_config.h
++++ b/src/global_config.h
+@@ -15,6 +15,7 @@
+ #define MIC_VOL                            70
+ #define SPK_VOL                            70
+ 
++
+ /*Audio Info */
+ typedef struct _audio_info {
+ 	uint8_t audio_en;                  /* audio 使能， 默认开AMIC */
+diff --git a/src/include/imp-common.h b/src/include/imp-common.h
+old mode 100644
+new mode 100755
+index 9c039d8..1678b49
+--- a/src/include/imp-common.h
++++ b/src/include/imp-common.h
+@@ -15,6 +15,7 @@
+ #include <imp/imp_isp.h>
+ #include <imp/imp_encoder.h>
+ 
++
+ #include <imp/imp_audio.h>
+ #include <imp/imp_dmic.h>
+ 
+@@ -32,6 +33,8 @@ extern int g_Power_save;
+ #define UVC_VIDEO_CH			0
+ #define ALGORITHM_VIDEO_CH		1
+ 
++#define OSD_HANDLE_NUM    1 
++
+ #define SENSOR_FRAME_RATE_NUM_25	25
+ #define SENSOR_FRAME_RATE_NUM_30	30
+ #define SENSOR_FRAME_RATE_DEN		1
+@@ -179,6 +182,7 @@ struct chn_conf{
+ 	IMPFSChnAttr fs_chn_attr;
+ 	IMPCell framesource_chn;
+ 	IMPCell imp_encoder;
++	IMPCell imp_osd;
+ };
+ 
+ #define  CHN_NUM  ARRAY_SIZE(chn)
+@@ -236,6 +240,24 @@ int sample_get_ucamera_af_onoff();
+ int sample_get_ucamera_af_cur();
+ 
+ int sample_uvc_framesource_init(int ch, int fps, int format, int width, int height);
++
++//osd
++IMPRgnHandle *sample_osd_init(int grpNum);
++int sample_osd_exit(IMPRgnHandle *prHander,int grpNum);
++int osd_show(IMPRgnHandle *prHander,int grpNum);
++
++//osd-ivs
++int module_osd_control_init(void);
++int module_osd_control_deinit(void);
++int IVS_OSD_Init(int grp_num);
++int IVS_OSD_Start(void);
++int IVS_OSD_Stop(void);
++int set_osd_ivs_switch(int on_off);
++
++//yuyv
++void set_yuyv_switch(int on_off);
++
++
+ #ifdef __cplusplus
+ #if __cplusplus
+ }
+diff --git a/src/include/module_face_zoom.h b/src/include/module_face_zoom.h
+old mode 100644
+new mode 100755
+index d198e9b..3e0bb1a
+--- a/src/include/module_face_zoom.h
++++ b/src/include/module_face_zoom.h
+@@ -9,5 +9,8 @@ int module_facezoom_process(void);
+ void module_facezoom_enable_impinited(uint8_t on);
+ int module_facezoom_init(imp_isp_attr_t isp_param, facezoom_func_param_t fz_param);
+ int module_facezoom_deinit(facezoom_func_param_t fz_param);
++void set_face_zoom_mode(int mode);
++void set_face_zoom_switch(int on_off);
++int get_facezoom_switch_class(void);
+ #endif
+ 
+diff --git a/src/include/module_led_control.h b/src/include/module_led_control.h
+old mode 100644
+new mode 100755
+index 48459a5..a0417b4
+--- a/src/include/module_led_control.h
++++ b/src/include/module_led_control.h
+@@ -3,9 +3,14 @@
+ #include <stdint.h>
+ #include <global_config.h>
+ 
++int module_key_ctl_read(int gpio_in);
++void module_key_ctl_write(int gpio_out, int value_out);
+ int module_led_init(void *param);
+ void module_led_deinit(void);
+ void module_led_ctl(int gpio, int value);
++int module_key_in_init(int gpio_in);
++int module_key_out_init(int gpio_out,int value_out);
++void  module_key_deinit(int gpio);
+ 
+ #endif
+ 
+diff --git a/src/include/module_ucamera_control.h b/src/include/module_ucamera_control.h
+index 8b6c53a..839ff30 100644
+--- a/src/include/module_ucamera_control.h
++++ b/src/include/module_ucamera_control.h
+@@ -1,7 +1,6 @@
+ #ifndef __MODULE_UCAMERA_CONTROL__H
+ #define __MODULE_UCAMERA_CONTROL__H
+ #include <stdint.h>
+-
+ void module_ucamera_enable_impinited();
+ int module_ucamera_stream_on(void);
+ int module_ucamera_get_focus_cur();
+diff --git a/src/main.c b/src/main.c
+old mode 100644
+new mode 100755
+index 2bd8ce9..f74e454
+--- a/src/main.c
++++ b/src/main.c
+@@ -7,10 +7,19 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <semaphore.h>
++#include <errno.h>
++#include <unistd.h>
+ #include <signal.h>
+ #include <pthread.h>
+-
++#include <sys/ioctl.h>
++#include <sys/time.h>
++#include <semaphore.h>
++#include <linux/input.h>
++#include <fcntl.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <sys/prctl.h>
++#include <node_list.h>
+ #include <usbcamera.h>
+ #include <AntiCopy_Verify.h>
+ #include <imp-common.h>
+@@ -19,6 +28,12 @@
+ #include <module_led_control.h>
+ #include "global_config.h"
+ #include "main.h"
++/*
++#include "uac_control.h"
++#include "uvc_control.h"
++*/
++
++#include <module_key_gpio.h>
+ 
+ #ifdef MODULE_FACEAE_ENABLE
+ #include <module_faceAE.h>
+@@ -33,6 +48,39 @@
+ #endif
+ 
+ #define TAG "KIVA"
++/*
++#define KEY_INVALID 	-1
++#define KEY_LOW_VALUE    0  
++#define KEY_HIGH_VALUE 	 1
++#define KEY_MODE_NUM 	 3
++
++#define KEY_BOARD_DRV_NAME "/dev/input/event1"
++
++#define TAG_KEY "KEY"
++
++
++enum{
++//按键模式
++	KEY_MODE_SINGLE,
++	KEY_MODE_MANY,
++	KEY_MODE_NORMAL,
++//gpio控制	
++	GPIO_PB00 = 32,
++	GPIO_PB01,
++	GPIO_PB02,
++	GPIO_PB03,
++	GPIO_PB04,
++	GPIO_PB05,
++//开关状态	
++	ENABLE = 0,
++	DISABLE,
++};
++
++static sem_t ucam_ready_sem;
++
++int key_type = 0; //关流时，键值复位
++*/
++
+ 
+ static sem_t ucam_ready_sem;
+ 
+@@ -68,7 +116,7 @@ static void auto_deinit()
+ #endif
+ 	sample_system_exit();
+ 	module_autofocus_deinit();
+-	module_led_deinit();
++	//module_led_deinit();
+ 	module_ucamera_deinit();
+ 	kiva_process_deinit();
+ }
+@@ -112,6 +160,7 @@ static int ucamera_system_init()
+ 	/* imp system init */
+ 
+ 	int ret = 0;
++	//ucam_impsdk_init_entry(NULL);
+ 	pthread_t ucam_impsdk_init_id;
+ 	ret = pthread_create(&ucam_impsdk_init_id, NULL, ucam_impsdk_init_entry, NULL);
+ 	if (ret != 0) {
+@@ -149,14 +198,14 @@ static int module_init()
+ 	/*
+ 	 * module_led
+ 	 **/
+-	printf("INFO(%s): module_led_init ...\n", TAG);
++/*	printf("INFO(%s): module_led_init ...\n", TAG);
+ 	ret = module_led_init(&g_func_param.led_ctl);
+ 	if (ret < 0) {
+ 		printf("ERROR(%s): module_led_init failed \n", TAG);
+ 		return -1;
+ 	}
+ 	printf("INFO(%s): module_led_init ...ok\n", TAG);
+-
++*/
+ 	/*
+ 	 * module_ucamera
+ 	 **/
+@@ -207,6 +256,315 @@ static int module_init()
+ 
+ }
+ 
++//gpio 34 ########################
++/*static int input_subsys_init(void)*/
++/*{*/
++	/*int fd = -1;*/
++	/*fd = open(KEY_BOARD_DRV_NAME, O_RDWR);*/
++	/*if (fd == -1) {*/
++		/*printf("ERROR(%s): open (%s) error\n",TAG, KEY_BOARD_DRV_NAME);*/
++		/*return -1;*/
++	/*}*/
++
++	/*return fd;*/
++/*}*/
++
++/*typedef struct _key_process{*/
++	/*int lastKeyEvent;*/
++	/*uint64_t oldKeyReleaseTime;*/
++	/*uint64_t lastKeyReleaseTime;*/
++
++/*}key_process_t;*/
++
++/*static key_process_t key_process;*/
++
++/*static uint64_t gettimestamp()*/
++/*{*/
++	/*struct timeval curtime;*/
++	/*gettimeofday(&curtime, NULL);*/
++
++	/*return (uint64_t)((uint64_t)curtime.tv_sec*1000000 + curtime.tv_usec);*/
++/*}*/
++
++/*static void key_mode_process(int key_type)*/
++/*{*/
++	/*switch(key_type){*/
++			/*case KEY_MODE_SINGLE:*/
++				/*[>printf("[%s]mode_success :%d \n",TAG_KEY,key_type);<]*/
++				/*printf("[%s]%s: single success !\n",TAG_KEY,__func__);*/
++				/*set_face_zoom_mode(1); //模式1*/
++				/*set_face_zoom_switch(ENABLE);//算法开*/
++				/*break;*/
++			/*case KEY_MODE_MANY:*/
++				/*[>printf("[%s]mode_success :%d \n",__func__,key_type);<]*/
++				/*printf("[%s]%s: many success !\n",TAG_KEY,__func__);*/
++				/*set_face_zoom_mode(2);//模式2*/
++				/*break;*/
++			/*case KEY_MODE_NORMAL:*/
++				/*[>printf("[%s]mode_success :%d \n",__func__,key_type);<]*/
++				/*printf("[%s]%s: normal success !\n",TAG_KEY,__func__);*/
++				/*set_face_zoom_switch(DISABLE);//关闭算法*/
++				/*break;*/
++			/*default:*/
++				/*printf("[%s]%s: set error %d!\n",TAG_KEY,__func__,key_type);*/
++				/*break;*/
++		/*}*/
++/*}*/
++
++/*static void *key_monitor_thread(void *arg)*/
++/*{*/
++	/*int ret = 0;*/
++	/*int fd = -1;*/
++	/*struct input_event buttons_event;*/
++
++	/*fd = input_subsys_init();*/
++	/*prctl(PR_SET_NAME, "key_monitor_thread");*/
++	/*printf("[%s]%s success !\n",TAG_KEY,__func__);*/
++	/*while(1){*/
++		/*memset(&buttons_event, 0 ,sizeof(struct input_event));*/
++		/*ret = read(fd, &buttons_event, sizeof(struct input_event));*/
++		/*if(ret < 0){*/
++			/*printf("WARNNING(%s):read error \n", TAG);*/
++			/*usleep(100*1000);*/
++			/*continue;*/
++		/*}*/
++		/*if(buttons_event.type != EV_KEY)*/
++			/*continue;*/
++
++		/*switch(buttons_event.value){*/
++			/*case KEY_LOW_VALUE:*/
++				/*if(module_ucamera_stream_on()){*/
++				/*key_process.lastKeyEvent = DISABLE;*/
++				/*}*/
++				/*break;*/
++			/*case KEY_HIGH_VALUE:*/
++				/*if(key_process.lastKeyEvent == DISABLE){*/
++					/*key_process.lastKeyEvent = ENABLE;*/
++					/*key_process.lastKeyReleaseTime = gettimestamp();*/
++				/*}*/
++				/*break;*/
++			/*default:*/
++				/*break;*/
++		/*}*/
++	/*}*/
++
++	/*close(fd);*/
++
++	/*return NULL;*/
++/*}*/
++
++/*static void *key_process_thread(void *arg)*/
++/*{*/
++	/*prctl(PR_SET_NAME, "key_process_thread");*/
++	/*printf("[%s]%s success !\n",TAG_KEY,__func__);*/
++	/*while(1){*/
++		/*//按键按下时*/
++		/*if(key_process.lastKeyEvent == ENABLE){*/
++			/*key_process.oldKeyReleaseTime = key_process.lastKeyReleaseTime;*/
++			/*sleep(1);*/
++			/*if(key_process.lastKeyReleaseTime != key_process.oldKeyReleaseTime){*/
++				/*key_process.oldKeyReleaseTime = key_process.lastKeyReleaseTime;*/
++			/*}else{*/
++			/*++key_type;*/
++			/*if(key_type == KEY_MODE_NUM){*/
++				/*key_type = KEY_MODE_SINGLE;*/
++			/*}*/
++			/*key_mode_process(key_type);*/
++			/*key_process.lastKeyEvent = KEY_INVALID;*/
++			/*key_process.oldKeyReleaseTime = key_process.lastKeyReleaseTime;*/
++			/*}*/
++		/*}else{ */
++			/*usleep(100*1000);*/
++		/*}*/
++	/*}*/
++
++	/*return NULL;*/
++/*}*/
++/*//####################################*/
++
++/*//gpio 32 33 #########################*/
++
++/*void key_init(void)*/
++/*{*/
++	/*int ret  = 0;*/
++	/*ret = module_key_in_init(GPIO_PB00); //PB00端口初始化 视频开关*/
++	/*if(ret < 0){*/
++			/*printf("ERROR(%s):%s PB00 init error \n", TAG_KEY,__func__);*/
++			/*return;*/
++		/*}*/
++	/*ret = module_key_in_init(GPIO_PB01); //PB01端口初始化 音频开关*/
++	/*if(ret < 0){*/
++			/*printf("ERROR(%s):%s PB01 init error \n", TAG_KEY,__func__);*/
++			/*return;*/
++		/*}*/
++	/*ret = module_key_out_init(GPIO_PB03,DISABLE); //PB03端口初始化 音频灯开关*/
++	/*if(ret < 0){*/
++			/*printf("ERROR(%s):%s PB03 init error \n",TAG_KEY,__func__);*/
++			/*return;*/
++		/*}*/
++	/*ret = module_key_out_init(GPIO_PB04,DISABLE); //PB04端口初始化 图像正常灯开关*/
++	/*if(ret < 0){*/
++			/*printf("ERROR(%s):%s PB04 init error \n", TAG_KEY,__func__);*/
++			/*return;*/
++		/*}*/
++	/*ret = module_key_out_init(GPIO_PB05,DISABLE); //PB05端口初始化 图像灯开关*/
++	/*if(ret < 0){*/
++			/*printf("ERROR(%s):%s PB05 init error \n", TAG_KEY,__func__);*/
++			/*return;*/
++		/*}*/
++		/*printf("[%s]%s success!\n",TAG_KEY,__func__);*/
++	/*return;*/
++/*}*/
++
++/*void set_stream_switch(int on_off)*/
++/*{*/
++	/*if(get_frame_fmt() != 1){*/
++	/*//set osd attr*/
++	/*IMPOSDRgnAttr rAttrRect_type_1;*/
++	/*IMPRgnHandle *han_data = prHander_interface();*/
++	/*memset(&rAttrRect_type_1,0,sizeof(IMPOSDRgnAttr));*/
++	/*//获取rgn属性			*/
++				/*if(IMP_OSD_GetRgnAttr(han_data[0],&rAttrRect_type_1) != 0){*/
++					/*printf("[%s][%d]IMP_OSD_GETRGNATTR error\n",__func__,__LINE__);*/
++					/*return;*/
++				/*}*/
++				/*rAttrRect_type_1.rect.p1.x = get_osd_width() - 1;*/
++				/*rAttrRect_type_1.rect.p1.y = get_osd_height() - 1;*/
++				/*if(IMP_OSD_SetRgnAttr(han_data[0], &rAttrRect_type_1) != 0){*/
++						/*printf("[%s][%d]IMP_OSD_SETRGNATTR error\n",__func__,__LINE__);*/
++						/*return;*/
++					/*}	*/
++	/*//osd show*/
++	/*if (IMP_OSD_ShowRgn(han_data[0], 0, on_off) != 0) {*/
++		/*IMP_LOG_ERR(TAG, "IMP_OSD_ShowRgn() timeStamp error\n");*/
++		/*return;*/
++	/*}*/
++	/*han_data = NULL;*/
++	/*}else{*/
++		/*//set_osd_ivs_switch(on_off);*/
++		/*set_yuyv_switch(on_off);*/
++	/*}*/
++	/*return;*/
++/*}*/
++
++/*static void *key_stir_thread(void *arg)*/
++/*{*/
++	/*int frame_on_off = 0;*/
++	/*int audio_on_off = 0;*/
++	/*prctl(PR_SET_NAME, "key_stir_thread");*/
++	/*key_init();*/
++	/*while(1){*/
++		/*if(module_ucamera_stream_on()){*/
++			/*if(!module_key_ctl_read(GPIO_PB00)){*/
++				/*if(frame_on_off == ENABLE){*/
++					/*frame_on_off = DISABLE;*/
++					/*//关图像*/
++					/*set_stream_switch(DISABLE);*/
++					/*set_audio_switch(ENABLE);*/
++					/*printf("[%s]%s off frame success!\n",TAG_KEY,__func__);*/
++				/*}*/
++					/*//图像灯*/
++					/*module_key_ctl_write(GPIO_PB05,ENABLE);*/
++					/*module_key_ctl_write(GPIO_PB03,DISABLE);*/
++					/*module_key_ctl_write(GPIO_PB04,DISABLE);*/
++					/*usleep(100*1000);*/
++/*#ifdef DBUG*/
++					/*printf("[%s]%s frame led on success!\n",TAG_KEY,__func__);*/
++/*#endif*/
++			/*}else if(!module_key_ctl_read(GPIO_PB01)){*/
++				/*if(audio_on_off == ENABLE){*/
++					/*audio_on_off = DISABLE;*/
++					/*//关音频*/
++					/*set_audio_switch(DISABLE);*/
++					/*set_stream_switch(ENABLE);*/
++					/*printf("[%s]%s off audio success!\n",TAG_KEY,__func__);*/
++				/*}*/
++					/*//音频灯*/
++					/*module_key_ctl_write(GPIO_PB03,ENABLE);*/
++					/*module_key_ctl_write(GPIO_PB05,DISABLE);*/
++					/*module_key_ctl_write(GPIO_PB04,DISABLE);*/
++					/*usleep(100*1000);*/
++/*#ifdef DBUG*/
++					/*printf("[%s]%s audio led on success!\n",TAG_KEY,__func__);*/
++/*#endif*/
++			/*}else{*/
++				/*if(frame_on_off == DISABLE || audio_on_off == DISABLE){*/
++					/*frame_on_off = ENABLE;*/
++					/*//开图像*/
++					/*set_stream_switch(ENABLE);*/
++					/*printf("[%s]%s on frame success!\n",TAG_KEY,__func__);*/
++							
++					/*audio_on_off = ENABLE;*/
++					/*//开音频*/
++					/*set_audio_switch(ENABLE);*/
++					/*printf("[%s]%s on audio success!\n",TAG_KEY,__func__);*/
++				/*}*/
++				/*//关音频灯*/
++				/*module_key_ctl_write(GPIO_PB03,DISABLE);*/
++				/*//关图像灯*/
++				/*module_key_ctl_write(GPIO_PB05,DISABLE);*/
++				/*//开正常图像灯*/
++				/*module_key_ctl_write(GPIO_PB04,ENABLE);*/
++				/*usleep(100*1000);*/
++			/*}*/
++		/*}else{*/
++			/*usleep(100*1000);*/
++			/*//关音频灯*/
++			/*module_key_ctl_write(GPIO_PB03,DISABLE);*/
++			/*//关图像灯*/
++			/*module_key_ctl_write(GPIO_PB05,DISABLE);*/
++			/*//关正常图像灯*/
++			/*module_key_ctl_write(GPIO_PB04,DISABLE);*/
++			/*//关音频*/
++			/*if(audio_on_off == ENABLE){*/
++			/*set_audio_switch(DISABLE);*/
++			/*audio_on_off = DISABLE;*/
++			/*}*/
++		/*}*/
++	/*}*/
++	/*return NULL;*/
++/*}*/
++/*//####################################*/
++/*static int module_key_process(void)*/
++/*{*/
++	/*int ret = 0;*/
++	/*key_process.lastKeyEvent = KEY_INVALID;*/
++
++	/*static pthread_t key_monitor_pid;*/
++	/*pthread_attr_t key_monitor_attr;*/
++	/*pthread_attr_init(&key_monitor_attr);*/
++	/*pthread_attr_setdetachstate(&key_monitor_attr, PTHREAD_CREATE_DETACHED);*/
++	/*pthread_attr_setschedpolicy(&key_monitor_attr, SCHED_OTHER);*/
++	/*ret = pthread_create(&key_monitor_pid, &key_monitor_attr, &key_monitor_thread, NULL);*/
++	/*if (ret) {*/
++		/*printf("ERROR(%s): create thread for key_monitor_thread failed!\n", TAG);*/
++		/*return -1;*/
++	/*}*/
++
++	/*static pthread_t key_process_pid;*/
++	/*pthread_attr_t key_process_attr;*/
++	/*pthread_attr_init(&key_process_attr);*/
++	/*pthread_attr_setdetachstate(&key_process_attr, PTHREAD_CREATE_DETACHED);*/
++	/*pthread_attr_setschedpolicy(&key_process_attr, SCHED_OTHER);*/
++	/*ret = pthread_create(&key_process_pid, &key_process_attr, &key_process_thread, NULL);*/
++	/*if (ret) {*/
++		/*printf("ERROR(%s): create thread for key_process_thread failed!\n", TAG);*/
++		/*return -1;*/
++	/*}*/
++
++	/*static pthread_t key_stir_pid;*/
++	/*pthread_attr_t key_stir_attr;*/
++	/*pthread_attr_init(&key_stir_attr);*/
++	/*pthread_attr_setdetachstate(&key_stir_attr, PTHREAD_CREATE_DETACHED);*/
++	/*pthread_attr_setschedpolicy(&key_stir_attr, SCHED_OTHER);*/
++	/*ret = pthread_create(&key_stir_pid, &key_stir_attr, &key_stir_thread, NULL);*/
++	/*if (ret) {*/
++		/*printf("ERROR(%s): create thread for key_stir_thread failed!\n", TAG);*/
++		/*return -1;*/
++	/*}*/
++	/*return 0;*/
++/*}*/
++
+ /* ---------------------------------------------------------------------------
+  * main
+  */
+@@ -265,7 +623,8 @@ int main(int argc, char *argv[])
+ 		auto_deinit();
+ 	}
+ 	printf("INFO(%s): kiva_process_init ...ok\n", TAG);
+-
++	
++	module_key_process();
+ 	while (1) {
+ 		sleep(60);
+ 
+diff --git a/src/modules/module_facezoom/Makefile b/src/modules/module_facezoom/Makefile
+old mode 100644
+new mode 100755
+index 9da196d..c76e1e7
+--- a/src/modules/module_facezoom/Makefile
++++ b/src/modules/module_facezoom/Makefile
+@@ -24,7 +24,7 @@ INCLUDE := -I../../include \
+ 
+ INCLUDE += -I../../../libs/t31_sdk/include
+ 
+-INCLUDE += -I../../../libs/faceDet/include \
++INCLUDE += -I$(LIBS_DIR)/faceDet/include \
+ 
+ OBJS := module_face_zoom.o
+ 
+diff --git a/src/modules/module_facezoom/module_face_zoom.c b/src/modules/module_facezoom/module_face_zoom.c
+old mode 100644
+new mode 100755
+index 34ee1eb..647a6f2
+--- a/src/modules/module_facezoom/module_face_zoom.c
++++ b/src/modules/module_facezoom/module_face_zoom.c
+@@ -35,17 +35,25 @@
+ 
+ static pthread_t facedet_pid;
+ static pthread_t facezoom_pid;
++static pthread_t facezoom_switch_pid; //算法开关线程
+ static int facedet_stop = 0;
+ 
+ static nl_context_t face_zoom_nl;
+ static float last_scaler = 1.0;
++static int face_width = 0;
++static int face_width_tmp = 0;
++static int face_width_last = 0;
++static int anti_shake_cnt = 0;
++static int facezoom_mode_empty = 0;
+ 
+ static int last_fcrop_left = 0;
+ static int last_fcrop_top = 0;
+ static int last_face_center_x = 0;
+ static int last_face_center_y = 0;
+ 
+-static int face_zoom_mode;
++static int face_zoom_mode;   //模式切换开关
++static int facezoom_switch; //算法开关
++static int facezoom_switch_class; //实现算法开关
+ static uint8_t face_zoom_impinited = 0;
+ 
+ static uint16_t g_VideoWidth = 1920;
+@@ -55,6 +63,7 @@ static uint8_t g_HV_Flip = 3;
+ #define VALUE_INTERVAL 		(0.01)
+ #define VALUE_LEVEL_1_0		1		// 1 scaler
+ #define VALUE_LEVEL_1_3		1.3		// 1.3 scaler
++#define VALUE_LEVEL_1_3_1	1.31 	// 1.31 scaler
+ #define VALUE_LEVEL_1_5		1.5		// 1.5 scaler
+ #define VALUE_LEVEL_2_0		2		// 2.0 scaler
+ #define VALUE_LEVEL_2_3		2.3		// 2.3 scaler
+@@ -71,6 +80,21 @@ typedef struct{
+ 
+ IMPIVSInterface *interface = NULL;
+ 
++void set_face_zoom_mode(int mode)
++{
++	face_zoom_mode = mode;	
++}
++
++void set_face_zoom_switch(int on_off)
++{
++	facezoom_switch = on_off;	
++}
++
++
++int get_facezoom_switch_class(void)
++{
++	return facezoom_switch_class;	
++}
+ static int sample_ivs_facedet_start(int grp_num, int chn_num, IMPIVSInterface **interface) {
+ 	int ret = 0;
+ 	facedet_param_input_t param;
+@@ -261,7 +285,7 @@ static int face_zoom_set(float scaler_level, int face_center_x, int face_center_
+ 	fcrop_obj.fcrop_top = zoomtop_cur;
+ 	fcrop_obj.fcrop_width = zoomwidth_cur;
+ 	fcrop_obj.fcrop_height = zoomheight_cur;
+-#if 1
++#if 0
+ 	printf("INFO: value_cur = %f, face_center(%d, %d), face_center_cur(%d, %d), fcrop(%d, %d), width = %d, height = %d\n", value_cur,\
+ 			face_center_x, face_center_y,\
+ 			face_center_x_cur, face_center_y_cur,\
+@@ -278,18 +302,39 @@ static int face_zoom_set(float scaler_level, int face_center_x, int face_center_
+ 	return 0;
+ }
+ 
++static void face_zoom_reset(void)
++{	
++	IMPISPFrontCrop fcrop_obj;
++	int ret;
++	
++	IMP_ISP_Tuning_GetFrontCrop(&fcrop_obj);
++
++	fcrop_obj.fcrop_enable = 1;
++	fcrop_obj.fcrop_left = 0;
++	fcrop_obj.fcrop_top = 0;
++	fcrop_obj.fcrop_width = g_VideoWidth;
++	fcrop_obj.fcrop_height = g_VideoHeight;
++	
++	ret = IMP_ISP_Tuning_SetFrontCrop(&fcrop_obj);
++	if (ret < 0) {
++		printf("[%s]%s error\n",TAG,__func__);
++		return;
++	}
++#ifdef DBUG
++	printf("[%s]%s success !\n",TAG,__func__);
++	printf("[%s]%s g_VideoWidth  g_VideoHeight !\n",TAG,__func__, g_VideoWidth,g_VideoHeight);
++#endif
++	return;
++}
++
+ static int face_zoom_single_mode(void)
+ {
+ 	node_t* fz_node = NULL;
+ 	face_zoom_t face_zoom[MAX_NUM_FACE];
+ 	unsigned char face_num = 0;
+-	static int face_width = 0;
+ 	int face_index = 0;
+ 	static int face_center_x = 0;
+ 	static int face_center_y = 0;
+-	int face_width_tmp = 0;
+-	static int face_width_last = 0;
+-	static int anti_shake_cnt = 0;
+ 
+ 	fz_node = Get_Use_Node(face_zoom_nl);
+ 	if(!fz_node){
+@@ -329,14 +374,18 @@ static int face_zoom_single_mode(void)
+ 	/* face center location before fcrop, such as in 1920x1080 frame */
+ 	face_center_x = last_fcrop_left + face_zoom[face_index].face_center_x * ALGO_CHN_SCALER / last_scaler;
+ 	face_center_y = last_fcrop_top + face_zoom[face_index].face_center_y * ALGO_CHN_SCALER / last_scaler;
+-	/*printf("face_width %d , face_center2(%d, %d)\n", face_width,face_center_x, face_center_y);*/
++#ifdef DBUG
++	printf("face_width %d , face_center2(%d, %d),num:%d \n", face_width,face_center_x, face_center_y,face_index);
++#endif
+ zoom_continue:
+ 	if((face_width > 100) && (face_width < 500)) {
+ 		face_zoom_set(VALUE_LEVEL_1_3, face_center_x, face_center_y);
+ 	}else if(face_width > 520) {
+ 		face_zoom_set(VALUE_LEVEL_1_0, face_center_x, face_center_y);
+ 	}
+-
++#ifdef DBUG
++	printf("[%s]facezoom_mode:%d \n",__func__,face_zoom_mode);
++#endif
+ 	return 0;
+ }
+ 
+@@ -350,12 +399,8 @@ static int face_zoom_multi_mode(void)
+ 	int face_br_x = 0;
+ 	unsigned char face_br_index = 0;
+ 	int i = 0;
+-	static int face_width = 0;
+ 	static int face_center_x = 0;
+ 	static int face_center_y = 0;
+-	int face_width_tmp = 0;
+-	static int face_width_last = 0;
+-	static int anti_shake_cnt = 0;
+ 
+ 	fz_node = Get_Use_Node(face_zoom_nl);
+ 	if(!fz_node){
+@@ -387,7 +432,9 @@ static int face_zoom_multi_mode(void)
+ 		face_width = face_width_tmp;
+ 		face_center_x = last_fcrop_left + face_zoom[0].face_center_x * ALGO_CHN_SCALER / last_scaler;
+ 		face_center_y = last_fcrop_top + face_zoom[0].face_center_y * ALGO_CHN_SCALER / last_scaler;
++#ifdef DBUG
+ 		printf("%d face_width %d ,face_center(%d, %d)\n", face_num, face_width, face_center_x, face_center_y);
++#endif
+ 	} else {
+ 		face_ul_x = face_zoom[0].face_center_x;
+ 		face_br_x = face_zoom[0].face_center_x;
+@@ -424,19 +471,21 @@ static int face_zoom_multi_mode(void)
+ 		face_width = face_width_tmp;
+ 		face_center_x = last_fcrop_left + face_center_x * ALGO_CHN_SCALER / last_scaler;
+ 		face_center_y = last_fcrop_top + face_center_y * ALGO_CHN_SCALER / last_scaler;
+-
++#ifdef DBUG
+ 		printf("%d face_width %d , face_center(%d, %d)\n",face_num, face_width, face_center_x, face_center_y);
++#endif
+ 	}
+ 
+ zoom_continue:
+-	if((face_width > 80) && (face_width < 380)) {
+-		face_zoom_set(VALUE_LEVEL_1_5, face_center_x, face_center_y);
+-	}else if((face_width > 400) && (face_width < 680)) {
+-		face_zoom_set(VALUE_LEVEL_1_3, face_center_x, face_center_y);
++	
++	if((face_width > 200) && (face_width < 680)) {
++		face_zoom_set(VALUE_LEVEL_1_3_1, face_center_x, face_center_y);
+ 	}else if(face_width > 700) {
+ 		face_zoom_set(VALUE_LEVEL_1_0, face_center_x, face_center_y);
+ 	}
+-
++#ifdef DBUG
++	printf("[%s]facezoom_mode:%d\n",__func__,face_zoom_mode);
++#endif
+ 	return 0;
+ }
+ 
+@@ -445,10 +494,21 @@ void *face_zoom_process(void *none)
+ {
+ 	int ret = -1;
+ 
++	facezoom_switch_class = 0;
+ 	prctl(PR_SET_NAME, "face_zoom");
+-	facedet_stop = 0;
+-	while(!facedet_stop)
++	printf("[%s]%s success!\n",TAG,__func__);
++	while(!facezoom_switch_class)
+ 	{
++		if((face_zoom_mode != SINGLE_MODE) && !facezoom_mode_empty)
++		{
++			face_zoom_reset();
++			last_scaler = 1.0;
++			face_width = 0;
++			face_width_tmp = 0;
++			face_width_last = 0;
++			anti_shake_cnt = 0;
++			facezoom_mode_empty = 1;
++		}
+ 		switch(face_zoom_mode){
+ 			case SINGLE_MODE:
+ 				ret = face_zoom_single_mode();
+@@ -468,7 +528,7 @@ void *face_zoom_process(void *none)
+ 				break;
+ 		}
+ 	}
+-	printf("face_zoom_process exit ok!\n");
++	printf("[%s]%s exit ok!\n",TAG,__func__);
+ 	return NULL;
+ 	/*return 0;*/
+ }
+@@ -489,7 +549,7 @@ void *face_detect_process(void* none)
+ 	printf("facedet ivs start ok\n");
+ 
+ 	prctl(PR_SET_NAME, "face_detect");
+-	while(!facedet_stop)
++	while(!facezoom_switch_class)
+ 	{
+ 		ret = IMP_IVS_PollingResult(0, TIME_OUT);
+ 		if (ret < 0) {
+@@ -543,8 +603,63 @@ release_fs:
+ 		return NULL;
+ 	}
+ 
++	printf("[%s]%s exit ok!\n",TAG,__func__);
++	return NULL;
++}
++
++//开关线程
++void *face_zoom_switch(void *none)
++{
++	int ret = -1;
++
++	prctl(PR_SET_NAME, "face_zoom_switch");
++	facedet_stop = 0;
++	facezoom_switch = 0;
++#ifdef DBUG
++	printf("[%s]%s success!\n",TAG,__func__);
++#endif
++	while(!facedet_stop)
++	{
++		switch(facezoom_switch){
++			case 0:
++				ret = pthread_create(&facezoom_pid, NULL, face_zoom_process, NULL);
++				if (ret != 0) {
++				printf("pthread_create failed \n");
++				return NULL;
++				}
+ 
++				ret = pthread_create(&facedet_pid, NULL, face_detect_process, NULL);
++				if (ret != 0) {
++				printf("pthread_create failed \n");
++				return NULL;
++				}
++				
++				facezoom_switch = -1;
++				break;
++			case 1:
++				facezoom_switch_class = 1;
++				last_scaler = 1.0;
++				face_width = 0;
++				facezoom_mode_empty = 0;
++				face_zoom_reset();
++				usleep(20 * 1000);
++				//printf("&&&&&&&&&&&&&facezoom_switch_class:%d\n&&&&&&&",facezoom_switch_class);
++				pthread_join(facedet_pid, NULL);
++				pthread_join(facezoom_pid, NULL);
++				facezoom_switch = -1;
++				break;
++			default:
++				/*printf("INFO[%s]: face center mode doesn't support!\n", TAG);*/
++				sleep(1);
++				break;
++		}
++		//printf("&&&&&&&&&&&&&facezoom_switch:%d\n&&&&&&&",facezoom_switch);
++	}
++#ifdef DBUG
++	printf("[%s]%s exit ok!\n",TAG,__func__);
++#endif
+ 	return NULL;
++	/*return 0;*/
+ }
+ 
+ void module_facezoom_enable_impinited(uint8_t on)
+@@ -603,17 +718,12 @@ int module_facezoom_init(imp_isp_attr_t isp_param, facezoom_func_param_t fz_para
+ 		return -1;
+ 	}
+ 
+-	ret = pthread_create(&facezoom_pid, NULL, face_zoom_process, NULL);
+-	if (ret != 0) {
+-		printf("pthread_create failed \n");
+-		return -1;
+-	}
+-
+-	ret = pthread_create(&facedet_pid, NULL, face_detect_process, NULL);
++	ret = pthread_create(&facezoom_switch_pid, NULL, face_zoom_switch, NULL);
+ 	if (ret != 0) {
+ 		printf("pthread_create failed \n");
+ 		return -1;
+ 	}
++	
+ 	return 0;
+ }
+ 
+@@ -626,9 +736,19 @@ int module_facezoom_deinit(facezoom_func_param_t fz_param)
+ 		return 0;
+ 	}
+ 
++	last_scaler = 1.0;
+ 	facedet_stop = 1;
++	face_width = 0;
++	face_width_tmp = 0;
++	face_width_last = 0;
++	anti_shake_cnt = 0;
++	facezoom_switch = 1;
++	facezoom_switch_class = 1;
++	facezoom_mode_empty = 0;
+ 	pthread_join(facedet_pid, NULL);
+ 	pthread_join(facezoom_pid, NULL);
++	
++	pthread_join(facezoom_switch_pid, NULL);
+ 
+ 	IMPCell framesource_cell = {DEV_ID_FS, ALGORITHM_VIDEO_CH, 0};
+ 	IMPCell ivs_cell = {DEV_ID_IVS, 0, 0};
+diff --git a/src/modules/module_led/module_led_control.c b/src/modules/module_led/module_led_control.c
+old mode 100644
+new mode 100755
+index b30343d..80f70c3
+--- a/src/modules/module_led/module_led_control.c
++++ b/src/modules/module_led/module_led_control.c
+@@ -4,8 +4,132 @@
+ 
+ #define MODULE_TAG              "LED_CONTROL"
+ static led_ctl_t led_ctx;
++//输入端口
++static int key_in_init(int gpio_in)//, int value)
++{
++	char direction_path[64] = {0};
++	//char value_path[64] = {0};
++	FILE *p = NULL;
+ 
+-static int led_init(int gpio, int value)
++	/* Robot ARM Leds.	*/
++	p = fopen("/sys/class/gpio/export","w");
++	if (!p)
++		return -1;
++	fprintf(p,"%d",gpio_in);
++	fclose(p);
++
++	sprintf(direction_path, "/sys/class/gpio/gpio%d/direction", gpio_in);
++	//sprintf(value_path, "/sys/class/gpio/gpio%d/value", gpio);
++
++	p = fopen(direction_path, "w");
++	if (!p)
++		return -1;
++	//fprintf(p, "out");
++	fprintf(p, "in");
++	fclose(p);
++
++	/*p = fopen(value_path, "w");
++	if (!p)
++		return -1;
++	fprintf(p, "%d", value);
++	fclose(p);
++	*/
++	return 0;
++}
++//读取数据
++static int read_gpio_ctl(int gpio_in)
++{
++	char value_path[64] = {0};
++	int value = 0;
++	FILE *p = NULL;
++
++	sprintf(value_path, "/sys/class/gpio/gpio%d/value", gpio_in);
++
++	p = fopen(value_path, "r");
++	if (!p) {
++		printf("ERROR(%s): fopen %s failed \n", MODULE_TAG, value_path);
++		return -1;
++	}
++	fscanf(p,"%d", &value);
++	fclose(p);
++	//printf("[%s]gpio_value:%d\n",__func__,value);
++	return value;
++}
++
++int module_key_ctl_read(int gpio_in)
++{	int gpio_value = 0;
++	gpio_value = read_gpio_ctl(gpio_in);
++
++	return gpio_value; 
++}
++
++int module_key_in_init(int gpio_in)
++{
++		return key_in_init(gpio_in);
++}
++
++//输出端口
++static int key_out_init(int gpio_out,int value_out)
++{
++	char direction_path[64] = {0};
++	char value_path[64] = {0};
++	FILE *p = NULL;
++
++	/* Robot ARM Leds.	*/
++	p = fopen("/sys/class/gpio/export","w");
++	if (!p)
++		return -1;
++	fprintf(p,"%d",gpio_out);
++	fclose(p);
++
++	sprintf(direction_path, "/sys/class/gpio/gpio%d/direction", gpio_out);
++	sprintf(value_path, "/sys/class/gpio/gpio%d/value", gpio_out);
++
++	p = fopen(direction_path, "w");
++	if (!p)
++		return -1;
++	fprintf(p, "out");
++	fclose(p);
++
++	p = fopen(value_path, "w");
++	if (!p)
++		return -1;
++	fprintf(p, "%d", value_out);
++	fclose(p);
++	
++	return 0;
++}
++
++static void key_ctl_write(int gpio_out, int value_out)
++{
++	char value_path[64] = {0};
++	FILE *p = NULL;
++
++	sprintf(value_path, "/sys/class/gpio/gpio%d/value", gpio_out);
++
++	p = fopen(value_path, "w");
++	if (!p) {
++		printf("ERROR(%s): fopen %s failed \n", MODULE_TAG, value_path);
++		return;
++	}
++	fprintf(p,"%d", value_out);
++	fclose(p);
++}
++
++void module_key_ctl_write(int gpio_out, int value_out)
++{
++
++	key_ctl_write(gpio_out, value_out);
++}
++
++
++int module_key_out_init(int gpio_out,int value_out)
++{
++		return key_out_init(gpio_out,value_out);
++}
++
++//LED
++static int led_init(int gpio,int value)
+ {
+ 	char direction_path[64] = {0};
+ 	char value_path[64] = {0};
+@@ -32,7 +156,7 @@ static int led_init(int gpio, int value)
+ 		return -1;
+ 	fprintf(p, "%d", value);
+ 	fclose(p);
+-
++	
+ 	return 0;
+ }
+ 
+@@ -51,6 +175,7 @@ static void led_ctl(int gpio, int value)
+ 	fprintf(p,"%d", value);
+ 	fclose(p);
+ }
++
+ void module_led_ctl(int gpio, int value)
+ {
+ 
+@@ -63,13 +188,25 @@ int module_led_init(void *param)
+ 	led_ctx.gpio = -1;
+ 	led_ctx = *((led_ctl_t *)param);
+ 	if (led_ctx.gpio != -1) {
+-		led_init(led_ctx.gpio, led_ctx.level);
++		led_init(led_ctx.gpio,led_ctx.level);
+ 	} else {
+ 		return 1;
+ 	}
+ 	return 0;
+ }
+ 
++void  module_key_deinit(int gpio)
++{
++	FILE *p = NULL;
++	p = fopen("/sys/class/gpio/unexport","w");
++	if (!p)
++		return;
++	fprintf(p,"%d",gpio);
++	fclose(p);
++	printf("INFO(%s): module_led_deinit ...ok\n", MODULE_TAG);
++	return;
++}
++
+ void  module_led_deinit(void)
+ {
+ 	printf("INFO(%s): module_led_deinit ...ok\n", MODULE_TAG);
+diff --git a/src/modules/module_ucamera/module_ucamera_control.c b/src/modules/module_ucamera/module_ucamera_control.c
+index 4ef5ff3..6df5a34 100644
+--- a/src/modules/module_ucamera/module_ucamera_control.c
++++ b/src/modules/module_ucamera/module_ucamera_control.c
+@@ -6,7 +6,7 @@
+ #include "uvc_control.h"
+ #include "uac_control.h"
+ #include <global_config.h>
+-
++#include <unistd.h>
+ #define MODULE_TAG          "UCAMERA"
+ 
+ static struct Ucamera_Cfg ucfg;
+@@ -140,7 +140,7 @@ int module_ucamera_init(void *param)
+ 	int ret = -1;
+ 	/*device info */
+ 	device_info_init(param);
+-
++	usleep(1000);
+ 	uvc_control_init(param);
+ 	ret = uac_control_init(param);
+ 	if (ret < 0) {
+diff --git a/src/modules/module_ucamera/uac_control.c b/src/modules/module_ucamera/uac_control.c
+old mode 100644
+new mode 100755
+index 1813a99..13d00c6
+--- a/src/modules/module_ucamera/uac_control.c
++++ b/src/modules/module_ucamera/uac_control.c
+@@ -18,6 +18,14 @@ static struct Ucamera_Audio_CB_Func a_func;
+ 
+ static audio_info_t uac_ctx;
+ 
++static int audio_switch = 0;
++
++void set_audio_switch(int on_off){
++	
++	audio_switch = on_off;
++	
++}
++
+ static int sample_audio_dmic_pcm_get(short *pcm)
+ {
+ 
+@@ -51,12 +59,20 @@ static int sample_audio_amic_pcm_get(short *pcm)
+ 	int ret = 0;
+ 	int devID = 1;
+ 	int chnID = 0;
+-
++	IMPAudioFrame frm;
++	if(audio_switch == 0){
++	if(IMP_AI_SetVolMute(devID, chnID, 0) != 0){
++		IMP_LOG_ERR(MODULE_TAG, "Audio SetVolMuteSetVolMute disable error\n");
++		}
++	}else{
++	if(IMP_AI_SetVolMute(devID, chnID, 1) != 0 ){
++		IMP_LOG_ERR(MODULE_TAG, "Audio SetVolMuteSetVolMute enable error\n");
++		}	
++	}
+ 	ret = IMP_AI_PollingFrame(devID, chnID, 1000);
+ 	if (ret != 0 ) {
+ 		IMP_LOG_ERR(MODULE_TAG, "Audio Polling Frame Data error\n");
+ 	}
+-	IMPAudioFrame frm;
+ 	ret = IMP_AI_GetFrame(devID, chnID, &frm, BLOCK);
+ 	if(ret != 0) {
+ 		IMP_LOG_ERR(MODULE_TAG, "Audio Get Frame Data error\n");
+@@ -76,6 +92,7 @@ static int sample_audio_amic_pcm_get(short *pcm)
+ 		IMP_LOG_ERR(MODULE_TAG, "Audio release frame data error\n");
+ 		return 0;
+ 	}
++	
+ 	return frm.len;
+ 
+ }
+diff --git a/src/modules/module_ucamera/uac_control.h b/src/modules/module_ucamera/uac_control.h
+old mode 100644
+new mode 100755
+index dd8ed53..6d69239
+--- a/src/modules/module_ucamera/uac_control.h
++++ b/src/modules/module_ucamera/uac_control.h
+@@ -3,4 +3,5 @@
+ 
+ int uac_control_init(void *param);
+ void uac_control_deinit();
++void set_audio_switch(int on_off);
+ #endif
+diff --git a/src/modules/module_ucamera/uvc_control.c b/src/modules/module_ucamera/uvc_control.c
+old mode 100644
+new mode 100755
+index 7186393..57e737d
+--- a/src/modules/module_ucamera/uvc_control.c
++++ b/src/modules/module_ucamera/uvc_control.c
+@@ -20,6 +20,31 @@
+ #define GET_CUR			0x81
+ #define GET_LEN			0x85
+ 
++//osd句柄
++static IMPRgnHandle *prHander = NULL;
++static int frame_fmt = -1;
++int osd_width = 0;
++int osd_height = 0;
++
++IMPRgnHandle *prHander_interface(void)
++{
++	return prHander;
++}
++int get_frame_fmt(void)
++{
++		return frame_fmt;
++}
++int get_osd_width(void)
++{
++		return osd_width;
++}
++
++int get_osd_height(void)
++{
++		return osd_height;
++}
++
++
+ typedef struct _uvc_control {
+ 	uint8_t hvflip;
+ 	uint8_t stream_on;
+@@ -440,6 +465,8 @@ static int sample_video_powerlinefreq_set(int value)
+ 		printf("ERROR(%s) Sample set PowerLine Freq Invalid level:%d\n",MODULE_TAG,  value);
+ 		return 0;
+ 	}
++	
++	printf("[%s]attr:%d\n",__func__,attr);
+ 	ret = IMP_ISP_Tuning_SetAntiFlickerAttr(attr);
+ 	if (ret)
+ 		IMP_LOG_WARN(MODULE_TAG, "SetAntiFlickerAttr failed \n");
+@@ -449,6 +476,7 @@ static int sample_video_powerlinefreq_set(int value)
+ 		fps_num = SENSOR_FRAME_RATE_NUM_30;
+ 	else
+ 		fps_num = uvc_ctx.sensor_fps;
++	printf("[%s]attr:%d\n",__func__,attr);
+ 	ret = IMP_ISP_Tuning_GetSensorFPS(&fps_num_bak, &fps_den_bak);
+ 	if (ret < 0) {
+ 		IMP_LOG_WARN(MODULE_TAG, "GetSensorFPS failed \n");
+@@ -1037,7 +1065,6 @@ static int imp_sdk_init(int format, int width, int height)
+ 		printf("ERROR(%s): sample_uvc_framesource_init faile \n", MODULE_TAG);
+ 		return -1;
+ 	}
+-
+ 	if (format == V4L2_PIX_FMT_YUYV || format == V4L2_PIX_FMT_NV12) {
+ 		ret = sample_framesource_streamon(UVC_VIDEO_CH);
+ 		if (ret < 0) {
+@@ -1050,7 +1077,38 @@ static int imp_sdk_init(int format, int width, int height)
+ 			IMP_LOG_ERR(MODULE_TAG, "%s(%d):IMP_FrameSource_SetFrameDepth failed\n", __func__, __LINE__);
+ 			return -1;
+ 		}
++		frame_fmt = 1;
++//################IVS-OSD
++		/*frame_fmt = 1;
++		
++		ret = module_osd_control_init();
++		if (ret < 0) {
++			printf("ERROR(%s): osd init failed\n", MODULE_TAG);
++			return -1;
++		}
+ 
++		ret = IVS_OSD_Init(1);
++		if (ret < 0) {
++			printf("IMP_IVS_CreateGroup(1) failed\n");
++			return -1;
++		}
++		IMPCell ivscell = {DEV_ID_IVS, 1, 1};
++		IMPCell osdcell = {DEV_ID_OSD, OSD_CONTROL_GROUP, 0};
++		ret = IMP_System_Bind(&chn[UVC_VIDEO_CH].framesource_chn, &osdcell);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, " Bind FrameSource channel%d and OSD failed\n", UVC_VIDEO_CH);
++			return -1;
++		}
++		
++		ret = IMP_System_Bind(&osdcell, &ivscell);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, " Bind OSD and IVS failed\n");
++			return -1;
++		}
++
++		
++		IVS_OSD_Start();*/
++//###################################
+ 		uvc_ctx.stream_on = 1;
+ #ifdef MODULE_FACEZOOM_ENABLE
+ 		sem_wait(&uvc_ctx.ucam_fs_sem);
+@@ -1111,6 +1169,22 @@ static int imp_sdk_init(int format, int width, int height)
+ 		break;
+ 	}
+ 
++//创建osd组
++		ret = IMP_OSD_CreateGroup(chn[i].index);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, "IMP_OSD_CreateGroup(%d) e rror !\n", i);
++			return -1;
++		}
++	
++	Ucamera_LOG("OSD_CreateGroup success!");
++//初始化osd
++	prHander = sample_osd_init(chn[i].index);
++	if (prHander == NULL) {
++		IMP_LOG_ERR(MODULE_TAG, "OSD init failed\n");
++		return -1;
++	}
++	Ucamera_LOG("OSD_INIT success!");
++
+ 	/* Step.4 Bind */
+ 	i = UVC_VIDEO_CH;
+ 	if (chn[i].enable) {
+@@ -1136,12 +1210,23 @@ static int imp_sdk_init(int format, int width, int height)
+ 			return -1;
+ 		}
+ #else
+-		ret = IMP_System_Bind(&chn[i].framesource_chn, &chn[i].imp_encoder);
++		/*ret = IMP_System_Bind(&chn[i].framesource_chn, &chn[i].imp_encoder);
+ 		if (ret < 0) {
+ 			IMP_LOG_ERR(MODULE_TAG, "Bind FrameSource channel%d and Encoder failed\n",i);
+ 			return -1;
+-		}
++		}*/
+ #endif
++		ret = IMP_System_Bind(&chn[i].framesource_chn, &chn[i].imp_osd);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, "Bind FrameSource channel%d and OSD failed\n",i);
++			return -1;
++		}
++		
++		ret = IMP_System_Bind(&chn[i].imp_osd, &chn[i].imp_encoder);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, "Bind OSD and Encoder failed\n");
++			return -1;
++		}
+ 	}
+ 
+ 	/* Stream On */
+@@ -1180,6 +1265,31 @@ static int imp_sdk_deinit(int format)
+ 	int i, ret;
+ 
+ 	if (format == V4L2_PIX_FMT_YUYV || format == V4L2_PIX_FMT_NV12) {
++		frame_fmt = -1;
++		//##################IVS_OSD
++		/*frame_fmt = -1;
++		IMPCell ivscell = {DEV_ID_IVS, 1, 1};
++		IMPCell osdcell = {DEV_ID_OSD, OSD_CONTROL_GROUP, 0};
++		ret = IMP_System_UnBind(&chn[UVC_VIDEO_CH].framesource_chn, &osdcell);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, " UnBind FrameSource channel%d and OSD failed\n", UVC_VIDEO_CH);
++			return -1;
++		}
++
++		ret = IMP_System_UnBind(&osdcell, &ivscell);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, " UnBind OSD and IVS failed\n");
++			return -1;
++		}
++
++		IVS_OSD_Stop();
++		
++		ret = module_osd_control_deinit();
++		if (ret < 0) {
++			printf("ERROR(%s): osd_init exit failed\n", MODULE_TAG);
++			return -1;
++		}*/
++		//###########################
+ 		/* Step.5 Stream Off */
+ 		ret = sample_framesource_streamoff(UVC_VIDEO_CH);
+ 		if (ret < 0) {
+@@ -1244,14 +1354,31 @@ static int imp_sdk_deinit(int format)
+ 				return -1;
+ 			}
+ #else
+-			ret = IMP_System_UnBind(&chn[i].framesource_chn, &chn[i].imp_encoder);
++			/*ret = IMP_System_UnBind(&chn[i].framesource_chn, &chn[i].imp_encoder);
+ 			if (ret < 0) {
+ 				IMP_LOG_ERR(MODULE_TAG, "UnBind FrameSource channel%d and Encoder failed\n",i);
+ 				return -1;
++			}*/
++			ret = IMP_System_UnBind(&chn[i].imp_osd, &chn[i].imp_encoder);
++			if (ret < 0) {
++				IMP_LOG_ERR(MODULE_TAG, "UnBind FrameSource channel%d and OSD failed\n",i);
++				return -1;
++			}
++			ret = IMP_System_UnBind(&chn[i].framesource_chn, &chn[i].imp_osd);
++			if (ret < 0) {
++				IMP_LOG_ERR(MODULE_TAG, "UnBind OSD and Encoder failed\n");
++				return -1;
+ 			}
+ #endif
+ 		}
+-
++	
++		/* Step.c OSD exit */
++		ret = sample_osd_exit(prHander,chn[i].index);
++		if (ret < 0) {
++			IMP_LOG_ERR(MODULE_TAG, "OSD exit failed\n");
++			return -1;
++		}
++		
+ 		/* Step.c Encoder exit */
+ 		switch (format) {
+ 		case V4L2_PIX_FMT_YUYV:
+@@ -1300,6 +1427,8 @@ static int uvc_event_process(int event_id, void *data)
+ 		/*uvc_ctx.stream_on = 1;*/
+ 		intervals = frame->intervals;
+ 		uvc_ctx.sensor_fps = 10000000 / intervals;
++		osd_width = frame->width;
++		osd_height = frame->height;
+ 		int retry_cnt = 0;
+ imp_init_check:
+ 		if (!uvc_ctx.imp_inited) {
+diff --git a/src/modules/module_ucamera/uvc_control.h b/src/modules/module_ucamera/uvc_control.h
+old mode 100644
+new mode 100755
+index 30dfddb..90d403d
+--- a/src/modules/module_ucamera/uvc_control.h
++++ b/src/modules/module_ucamera/uvc_control.h
+@@ -1,6 +1,6 @@
+ #ifndef __UVC_CONTROL__H
+ #define __UVC_CONTROL__H
+-
++#include <imp/imp_osd.h>
+ int uvc_stream_on(void);
+ void uvc_enable_impinited(int on);
+ int uvc_get_focus_cur();
+@@ -9,4 +9,9 @@ void uvc_post_fs_sem();
+ 
+ int uvc_control_init(void *param);
+ void uvc_control_deinit();
++
++IMPRgnHandle *prHander_interface(void);
++int get_osd_width(void);
++int get_osd_height(void);
++int get_frame_fmt(void);
+ #endif

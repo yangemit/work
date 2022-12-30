@@ -1,0 +1,6 @@
+module_param
+	af_en: af 使能
+	uvc_extension_en: 扩展单元使能
+
+	in_sample_rate: dmic 采样率, 默认16k
+	dmic_channel:   dmic 声道， 默认单声道

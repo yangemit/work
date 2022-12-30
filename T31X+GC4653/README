@@ -1,0 +1,24 @@
+## 重构 Kiva 代码
+
+### src
+	kiva.c：入口
+	common
+		load_config.c：配置文件处理
+		thread_process.c：应用逻辑处理
+		imp-common.c：imp 公共库
+
+#### modules
+	module_ucamera: (已验证)
+		uvc/uac 核心代码
+		ucamcorelib
+        module_autofocus: （已验证）
+		af 对焦算法处理
+	module_led：（已验证）
+		流控指示灯
+	module_facezoom：
+		C 位功能
+	module_faceae：
+		区域曝光
+	module_track：(已验证)
+		机械云台
+

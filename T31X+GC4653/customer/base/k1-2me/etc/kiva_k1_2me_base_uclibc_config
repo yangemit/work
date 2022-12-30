@@ -1,0 +1,48 @@
+################### begin ################
+
+#########################################
+#
+#		uboot:		0.25M
+#		kernel:		2.5M
+#		rootfs:		2M
+#		appfs:		3.25M
+#
+#########################################
+
+SPI_NOR_INFO:
+	ERASE_SIZE=32K
+	PAGE_SIZE=256K
+
+PARTITION:
+	NAME=appfs
+	FS_TYPE=jffs2
+	SIZE=3328KK
+	IS_ROOT=no
+	STRIPPED=yes
+	COPYLIST:
+
+# copy to appfs
+		bin/base/uclibc/lrz > bin/
+		bin/base/uclibc/lsz > bin/
+		bin/base/uclibc/adbd > bin/
+		bin/t31/kiva/k1-2me/uclibc/ucamera  > bin/
+		bin/t31/kiva/k1-2me/uclibc/anticopy  > bin/
+		bin/t31/kiva/k1-2me/uclibc/hid_update  > bin/
+
+		board/t31/kiva/k1-2me/app_init.sh > init/
+		calibration/t31/kiva/k1-2me/imx415-t31.bin > etc/sensor/
+
+		configs/t31/kiva/k1-2me/uvc.config > config/
+		configs/t31/kiva/k1-2me/uvc.attr > config/
+		libs/uclibc/libaudioProcess.so > lib/
+		modules/t31/kiva/k1-2me/avpu.ko > lib/modules/
+		modules/t31/kiva/k1-2me/audio.ko > lib/modules/
+		modules/t31/kiva/k1-2me/videobuf2-vmalloc.ko > lib/modules/
+		modules/t31/kiva/k1-2me/libcomposite.ko > lib/modules/
+		modules/t31/kiva/k1-2me/tx-isp-t31.ko > lib/modules/
+		modules/t31/kiva/k1-2me/usbcamera.ko > lib/modules/
+		modules/t31/kiva/k1-2me/sensor_imx415_t31.ko > lib/modules/
+		modules/t31/kiva/k1-2me/gsensor-dw9714.ko > lib/modules/
+
+		board/t31/.system > /
+################### end ################
