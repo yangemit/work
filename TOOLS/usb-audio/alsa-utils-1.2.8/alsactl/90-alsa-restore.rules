@@ -1,0 +1,8 @@
+ACTION=="add", SUBSYSTEM=="sound", KERNEL=="controlC*", KERNELS!="card*", TEST=="/home/book/work/TOOLS/haohan-audio/alsa-utils-1.2.8/out/sbin", TEST=="/home/book/work/TOOLS/haohan-audio/alsa-utils-1.2.8/out/share/alsa", GOTO="alsa_restore_go"
+GOTO="alsa_restore_end"
+
+LABEL="alsa_restore_go"
+TEST!="/etc/alsa/state-daemon.conf", RUN+="/home/book/work/TOOLS/haohan-audio/alsa-utils-1.2.8/out/sbin/alsactl restore $attr{device/number}"
+TEST=="/etc/alsa/state-daemon.conf", RUN+="/home/book/work/TOOLS/haohan-audio/alsa-utils-1.2.8/out/sbin/alsactl nrestore $attr{device/number}"
+
+LABEL="alsa_restore_end"

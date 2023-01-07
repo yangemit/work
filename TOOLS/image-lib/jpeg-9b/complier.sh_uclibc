@@ -1,0 +1,11 @@
+#!/bin/bash
+#touch -c -m -t 201205210000 aclocal.m4
+#touch -c -m -t 201205210000 configure.ac
+#touch -c -m -t 201205210000 project/project.m4sugar
+
+mkdir -p out
+
+CFLAGS="-muclibc" CXXFLAGS="-muclibc" LDFLAGS="-muclibc" ./configure --prefix=$PWD/out --host=mips-linux-gnu --enable-shared
+make -j16
+make install
+

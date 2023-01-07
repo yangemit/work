@@ -1,0 +1,3 @@
+#!/bin/sh
+
+./configure --prefix=/home_a/ywu/jpeg-9b/out/ --host=mips-linux-gnu --enable-shared

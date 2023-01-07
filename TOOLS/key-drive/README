@@ -1,0 +1,17 @@
+#标准输入子系统：当前支持两个按键
+	sw1: 电源键
+	sw2：预留
+# 编译
+	DEFS += CONFIG_GPIO_SW1
+	DEFS += CONFIG_GPIO_SW2
+
+# 驱动参数
+	T31:
+	sw1_pins = GPIOB26
+	sw2_pins = GPIOB21
+	sw1_active_low = 1
+	T20:
+	sw1_pins = GPIOC12
+	sw2_pins = GPIOC17
+	sw1_active_low = 1
+
