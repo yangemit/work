@@ -137,14 +137,14 @@ enum{
 	KEY_MODE_SINGLE,
 	KEY_MODE_MANY,
 	KEY_MODE_NORMAL,
-//gpio控制	
+//gpio控制
 //	GPIO_PB00 = 32,
 //	GPIO_PB01,
 //	GPIO_PB02,
 	GPIO_PB17 = 49,
 	//GPIO_PB18,
 	GPIO_PB27 = 59,
-//开关状态	
+//开关状态
 	ENABLE = 0,
 	DISABLE,
 };
@@ -299,7 +299,7 @@ static int key_out_init(int gpio_out,int value_out)
 	//[>输出值<]
 	fprintf(p, "%d", value_out);
 	fclose(p);
-	
+
 	return 0;
 }
 //改变gpio电平
@@ -363,7 +363,7 @@ static void set_stream_switch(int on_off)
 	IMPOSDRgnAttr rAttrRect_type_1;
 	IMPRgnHandle *han_data = prHander_interface();
 	memset(&rAttrRect_type_1,0,sizeof(IMPOSDRgnAttr));
-	//获取rgn属性			
+	//获取rgn属性
 				if(IMP_OSD_GetRgnAttr(han_data[0],&rAttrRect_type_1) != 0){
 					printf("ERROR(%s)[%d]IMP_OSD_GETRGNATTR error\n",TAG_KEY,__LINE__);
 					return;
@@ -373,7 +373,7 @@ static void set_stream_switch(int on_off)
 				if(IMP_OSD_SetRgnAttr(han_data[0], &rAttrRect_type_1) != 0){
 						printf("INFO(%s)[%d]IMP_OSD_SETRGNATTR error\n",TAG_KEY,__LINE__);
 						return;
-					}	
+					}
 	//osd show
 	if (IMP_OSD_ShowRgn(han_data[0], 0, on_off) != 0) {
 		printf("INFO(%s)[%d]IMP_OSD_ShowRgn error\n",TAG_KEY,__LINE__);
@@ -395,7 +395,7 @@ char *set_ARGB_buff(char const *file,int x,int y)
 	FILE *fp;
 	char *osd_buff = NULL;
 	int size = 0;
-	
+
 	/*
 		调整png 图像的合适的宽-x_out高-y_out
 		第一个参数与第二个参数越大 osd图像越小
@@ -440,7 +440,7 @@ char *set_ARGB_buff(char const *file,int x,int y)
 		printf("[INFO] read ARGB data failed \n");//每次读一个，共读size次
 	}
 	fclose(fp);
-	
+
 	return osd_buff;
 }
 
@@ -464,7 +464,7 @@ static void set_osd_show(int *osd_on_off,int num,int png_frame_num)
 		if ( png_frame_num > 0 ) {
 			char const *png_frame_tmp = osd_sum_png.png_frame[png_frame_num-1];
 			//printf("[INFO] png_frame_num %s \n",png_frame_tmp);
-			//获取rgn属性			
+			//获取rgn属性
 			/*
 			   显示不同分辨率的时候
 			   会出现图像变小的时候
@@ -492,7 +492,7 @@ static void set_osd_show(int *osd_on_off,int num,int png_frame_num)
 			/*
 			   右上角显示
 			*/
-			
+
 			if ( png_frame_num == 5 ) {
 				rAttrRect_type_2.rect.p0.x = get_osd_width()/2-x_out/2;
 				rAttrRect_type_2.rect.p0.y = 0;
@@ -535,7 +535,7 @@ static void set_osd_show(int *osd_on_off,int num,int png_frame_num)
 				rAttrRect_type_2.fmt = PIX_FMT_ARGB;
 				rAttrRect_type_2.data.picData.pData = buff_ARGB;
 			}
-			
+
 			if(IMP_OSD_SetRgnAttr(han_data[num], &rAttrRect_type_2) != 0){
 				printf("INFO(%s)[%d]IMP_OSD_SETRGNATTR error\n",TAG_KEY,__LINE__);
 				return;
@@ -564,7 +564,7 @@ static void set_osd_show(int *osd_on_off,int num,int png_frame_num)
 				return;
 			}
 			han_data = NULL;
-			
+
 		}
 	}else{
 		//set_osd_ivs_switch(on_off);
@@ -633,7 +633,7 @@ static void set_brightness_sharpness(int reform,int *value,int flag)
 	} else {
 		bright -= 2;
 		*value = bright;
-		if ( *value >= 50 ) { 
+		if ( *value >= 50 ) {
 			if ( !flag ) {
 				ret = IMP_ISP_Tuning_SetBrightness(bright);
 				if (ret)
@@ -769,7 +769,7 @@ static void key_mode_process(int key ,key_info *pantiltzoom_flag)
 /*
 	图像控制
 */
-static void frame_switch(key_info *flag) 
+static void frame_switch(key_info *flag)
 {
 	int test = flag->frame_on_off;
 
@@ -788,7 +788,7 @@ static void frame_switch(key_info *flag)
 		set_stream_switch(DISABLE);
 		osd_switsh = 1;
 		set_osd_show(&osd_switsh,1,2);
-		
+
 		/* 亮度 */
 		flag->bright_value = 128;
 		/* 清晰度 */
@@ -801,7 +801,7 @@ static void frame_switch(key_info *flag)
 		flag->tilt_value = 0;
 		/* pantilt_flag */
 		flag->pantilt_flag = 0;
-		
+
 		memset(&zoom_crop, 0, sizeof(zoom_crop));
 		/*
 			zoom 回复初始值
@@ -833,11 +833,11 @@ static void frame_switch(key_info *flag)
 	需要再线程中定义 pan 与 tilt
 	i = （ -10，10 ）；
 	pan = tilt = 3600
-	
+
 	// 左移案例
 	pan = pan + 3600
 	if( (*pan / 3600) <= 10 ) {
-	
+
 		pantilt_set ;
 	} else {
 		pan = 36000
@@ -855,12 +855,12 @@ pan_set:   左( 3600 ~ 36000 ) 右( -3600 ~ -36000 )移动
 		tilt_set:  上( -3600 ~ 36000 ) 下( 3600 ~ 36000 )移动
 		一次移动以3600位一个单位
 	*/
-	
+
 	pan_set = *pan;
 	tilt_set = *tilt;
-	
-		
-	
+
+
+
 	int left = 0;
 	int top = 0;
 	int w = zoom_crop.w;
@@ -885,7 +885,7 @@ pan_set:   左( 3600 ~ 36000 ) 右( -3600 ~ -36000 )移动
 		printf("IMP Set Fcrop failed=%d\n",__LINE__);
 		return -1;
 	}
-	
+
 	return 0;
 }
 
@@ -941,8 +941,12 @@ static void  *gpio_ir_thread(void *arg)
 	/*
 	    连续按键测试时间
 	*/
-	/*struct timeval time_2;*/
-	/*long int t3 = 0, t4 = 0;*/
+	struct timeval time_2;
+	long int t3 = 0, t4 = 0;
+	/*
+	    长按标志，flag_time = 1 表示长按
+	*/
+	int flag_time = 0;
 
 	/*
 	   出图 蓝灯亮 控制标志
@@ -983,9 +987,23 @@ static void  *gpio_ir_thread(void *arg)
 			continue;
 		}
 
-		/*if ( 0x55 == rd_buf[0] ) */
-			/*continue;*/
-		
+		/*
+			长按处理标志：flag_time = 3时，进行长按处理
+		*/
+		if ( 0x55 != rd_buf[0] ) {
+			gettimeofday(&time_2, NULL);
+			t3 = time.tv_sec * 1000 + time.tv_usec / 1000;
+			/*
+				两次按键的时间差
+			*/
+			//printf("[INFO] time %ld \n ",t3-t4);
+			if ( t3 - t4 <= 270 ) {
+				flag_time++;
+				//printf("[INFO] flag_time %d \n",flag_time);
+			}
+
+		}
+
 		if ( get_frame_switch() ) {
 			if ( 16 == rd_buf[0] ) { //KEY_1
 				//printf("[INFO] frame on_off\n");
@@ -994,91 +1012,159 @@ static void  *gpio_ir_thread(void *arg)
 			} else if ( 10 == rd_buf[0] ) { //KEY_2
 				audio_switch(&key_info_source);
 				//printf("[INFO] audio on_off\n");
-			} else if ( 2 == rd_buf[0]  ) { //KEY_4
+			} else if ( 2 == rd_buf[0] ) { //KEY_4
 				//上
 				//printf("[INFO] frame off move\n");
-				if ( (key_type != KEY_MODE_NORMAL) ) 
+				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-
-				key_info_source.tilt_value += 3600;
-				if ( (key_info_source.tilt_value / 3600 ) <= 10 ) {
-					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-					usleep( 100 * 1000 );
+				if( flag_time == 1 ) {
+					while(1) {
+						key_info_source.tilt_value += 3600;
+						if ( (key_info_source.tilt_value / 3600 ) <= 10 ) {
+							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+						} else {
+							key_info_source.tilt_value = 36000;
+							flag_time = 0;
+							break;
+						}
+						usleep( 30 * 1000 );
+					}
 				} else {
-					key_info_source.tilt_value = 36000;
+					key_info_source.tilt_value += 3600;
+					if ( (key_info_source.tilt_value / 3600 ) <= 10 ) {
+						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+					} else {
+						key_info_source.tilt_value = 36000;
+					}
 				}
 				osd_switsh = 1;
 				set_osd_show(&osd_switsh,1,5);
 				key_info_source.png_num = 5;
-			} else if ( 4 == rd_buf[0]  ) { //KEY_3
+			} else if ( 4 == rd_buf[0] ) { //KEY_3
 				//下
 				//printf("[INFO] frame on move\n");
-				if ( (key_type != KEY_MODE_NORMAL) ) 
+				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-
-				key_info_source.tilt_value -= 3600;
-				if ( (key_info_source.tilt_value / 3600 ) >= -10 ) {
-					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+				if ( flag_time == 1 ) {
+					while(1) {
+						key_info_source.tilt_value -= 3600;
+						if ( (key_info_source.tilt_value / 3600 ) >= -10 ) {
+							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+						} else {
+							key_info_source.tilt_value = -36000;
+							flag_time = 0;
+							break;
+						}
+						usleep( 30 * 1000 );
+					}
 				} else {
-					key_info_source.tilt_value = -36000;
+					key_info_source.tilt_value -= 3600;
+					if ( (key_info_source.tilt_value / 3600 ) >= -10 ) {
+						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+					} else {
+						key_info_source.tilt_value = -36000;
+					}
 				}
 				osd_switsh = 1;
 				set_osd_show(&osd_switsh,1,6);
 				key_info_source.png_num = 6;
-			} else if ( 5 == rd_buf[0]  ) { //KEY_5
+			} else if ( 5 == rd_buf[0] ) { //KEY_5
 				//左
 				//printf("[INFO] frame left move\n");
-				if ( (key_type != KEY_MODE_NORMAL) ) 
+				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-				key_info_source.pan_value += 3600;
-				if ( (key_info_source.pan_value / 3600 ) <= 10 ) {
-					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+				if ( flag_time == 1 ) {
+					while(1) {
+						key_info_source.pan_value += 3600;
+						if ( (key_info_source.pan_value / 3600 ) <= 10 ) {
+							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+						} else {
+							key_info_source.pan_value = 36000;
+							flag_time = 0;
+							break;
+						}
+						usleep( 30 * 1000 );
+					}
 				} else {
-					key_info_source.pan_value = 36000;
+					key_info_source.pan_value += 3600;
+					if ( (key_info_source.pan_value / 3600 ) <= 10 ) {
+						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+					} else {
+						key_info_source.pan_value = 36000;
+					}
 				}
 				osd_switsh = 1;
 				set_osd_show(&osd_switsh,1,8);
 				key_info_source.png_num = 8;
-			} else if ( 3 == rd_buf[0]  ) { //KEY_6
+			} else if ( 3 == rd_buf[0] ) { //KEY_6
 				//右
 				//printf("[INFO] frame right move\n");
-				if ( (key_type != KEY_MODE_NORMAL) ) 
+				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-				key_info_source.pan_value -= 3600;
-				if ( (key_info_source.pan_value / 3600 ) >= -10 ) {
-					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+				if ( flag_time == 1 ) {
+					while(1) {
+						key_info_source.pan_value -= 3600;
+						if ( (key_info_source.pan_value / 3600 ) >= -10 ) {
+							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+						} else {
+							key_info_source.pan_value = -36000;
+							flag_time = 0;
+							break;
+						}
+						usleep( 30 * 1000 );
+					}
 				} else {
-					key_info_source.pan_value = -36000;
+					key_info_source.pan_value -= 3600;
+					if ( (key_info_source.pan_value / 3600 ) >= -10 ) {
+						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
+					} else {
+						key_info_source.pan_value = -36000;
+					}
 				}
 				osd_switsh = 1;
 				set_osd_show(&osd_switsh,1,7);
 				key_info_source.png_num = 7;
-			} else if ( 7 == rd_buf[0]  ) { //KEY_7
+			} else if ( 7 == rd_buf[0] ) { //KEY_7
 				++key_type;
 				//printf("[INFO] frame mode0\n");
 				if ( key_type == KEY_MODE_NUM ) {
 					key_type = KEY_MODE_SINGLE;
 				}
 				key_mode_process(key_type,&key_info_source);
-			} else if ( 9 == rd_buf[0]  ) { //KEY_8
+			} else if ( 9 == rd_buf[0] ) { //KEY_8
 				//放大
-				if ( key_type != KEY_MODE_NORMAL) 
+				if ( key_type != KEY_MODE_NORMAL)
 					continue;
 				//printf("[INFO] be big\n");
-				key_info_source.zoom_value += 2;
-				//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
-				if ( key_info_source.zoom_value <= 200 ) {
-					set_zoom(&key_info_source.zoom_value);
+				if ( flag_time == 1 ) {
+					while(1) {
+						key_info_source.zoom_value += 5;
+						//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
+						if ( key_info_source.zoom_value <= 200 ) {
+							set_zoom(&key_info_source.zoom_value);
+						} else {
+							key_info_source.zoom_value = 200;
+							flag_time = 0;
+							break;
+						}
+						usleep( 30 * 1000 );
+					}
 				} else {
-					key_info_source.zoom_value = 200;
+					key_info_source.zoom_value += 5;
+					//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
+					if ( key_info_source.zoom_value <= 200 ) {
+						set_zoom(&key_info_source.zoom_value);
+					} else {
+						key_info_source.zoom_value = 200;
+					}
 				}
 				osd_switsh = 1;
 				key_info_source.pantilt_flag = 1;
@@ -1086,43 +1172,58 @@ static void  *gpio_ir_thread(void *arg)
 				key_info_source.png_num = 13;
 			} else if ( 8 == rd_buf[0]  ) { //KEY_9
 				//缩小
-				if ( key_type != KEY_MODE_NORMAL) 
+				if ( key_type != KEY_MODE_NORMAL)
 					continue;
 				//printf("[INFO] no be big\n");
-				key_info_source.zoom_value -= 2;
-				//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
-				if(key_info_source.zoom_value >= 100) {
-					set_zoom(&key_info_source.zoom_value); 
+				if ( flag_time == 1 ) {
+					while(1) {
+						key_info_source.zoom_value -= 5;
+						//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
+						if(key_info_source.zoom_value >= 100) {
+							set_zoom(&key_info_source.zoom_value);
+						} else {
+							key_info_source.zoom_value = 100;
+							flag_time = 0;
+							break;
+						}
+						usleep( 30 * 1000 );
+					}
 				} else {
-					key_info_source.zoom_value = 100;
+					key_info_source.zoom_value -= 5;
+					//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
+					if(key_info_source.zoom_value >= 100) {
+						set_zoom(&key_info_source.zoom_value);
+					} else {
+						key_info_source.zoom_value = 100;
+					}
 				}
 				osd_switsh = 1;
 				key_info_source.pantilt_flag = 1;
 				set_osd_show(&osd_switsh,1,12);
 				key_info_source.png_num = 12;
 
-			} else if ( 11 == rd_buf[0]  ) { //KEY_F1
+			} else if ( 11 == rd_buf[0] ) { //KEY_F1
 				//亮度减
 				//printf("[INFO] -- bright\n");
 				set_brightness_sharpness(DISABLE,&key_info_source.bright_value,ENABLE);
 				osd_switsh = 1;
 				set_osd_show(&osd_switsh,1,14);
 				key_info_source.png_num = 14;
-			} else if ( 12 == rd_buf[0]  ) { //KEY_F2
+			} else if ( 12 == rd_buf[0] ) { //KEY_F2
 				//亮度加
 				set_brightness_sharpness(ENABLE,&key_info_source.bright_value,ENABLE);
 				//printf("[INFO] ++ bright\n");
 				osd_switsh = 1;
 				set_osd_show(&osd_switsh,1,15);
 				key_info_source.png_num = 15;
-			} else if ( 0 == rd_buf[0]  ) { //KEY_F3
+			} else if ( 0 == rd_buf[0] ) { //KEY_F3
 				//锐度减
 				//printf("[INFO] -- sharpness\n");
 				set_brightness_sharpness(DISABLE,&key_info_source.sharp_value,DISABLE);
 				osd_switsh = 1;
 				set_osd_show(&osd_switsh,1,16);
 				key_info_source.png_num = 16;
-			} else if ( 6 == rd_buf[0]  ) { //KEY_F4
+			} else if ( 6 == rd_buf[0] ) { //KEY_F4
 				//锐度加
 				//printf("[INFO] ++ sharpness\n");
 				set_brightness_sharpness(ENABLE,&key_info_source.sharp_value,DISABLE);
@@ -1131,15 +1232,13 @@ static void  *gpio_ir_thread(void *arg)
 				key_info_source.png_num = 17;
 			}
 		}
-			
+
 		/*
-			测试连续按键所要的时间
+			其他按键触发长按标志，将其 flag_time 重置 0
 		*/
-		/*gettimeofday(&time_2, NULL);*/
-		/*t3 = time.tv_sec * 1000 + time.tv_usec / 1000;*/
-		/*printf("[INFO] time %ld \n ",t3-t4);*/
-		/*t4 = t3;*/
-		/*printf("[INFO] %d \n ",rd_buf[0]);*/
+
+		if ( flag_time > 1 ) flag_time = 0;
+		t4 = t3;
 
 		/*
 		   出图 蓝灯亮
@@ -1170,20 +1269,20 @@ static void  *gpio_ir_thread(void *arg)
 						}
 
 					}
-					if ( (t1 - t2) < (osd_time - 800) && rd_buf[0] != 0x55 ) 
+					if ( (t1 - t2) < (osd_time - 800) && rd_buf[0] != 0x55 )
 						t2 = time.tv_sec * 1000 + time.tv_usec / 1000;
 				/*
 				   led 闪烁
 				   */
 				if ( !key_info_source.frame_on_off ) {
 					module_key_ctl_write(GPIO_PB27,ENABLE);
-					usleep(35 * 1000);
+					usleep(15 * 1000);
 					module_key_ctl_write(GPIO_PB27,DISABLE);
-					usleep(35 * 1000);
+					usleep(15 * 1000);
 					module_key_ctl_write(GPIO_PB27,ENABLE);
 				} else {
 					module_key_ctl_write(GPIO_PB27,DISABLE);
-					usleep(35 * 1000);
+					usleep(15 * 1000);
 				}
 
 			} else {
@@ -1193,7 +1292,7 @@ static void  *gpio_ir_thread(void *arg)
 		} else {
 			usleep(10 * 1000);
 		}
-		
+
 		/*
 			关闭图像
 		*/
@@ -1227,7 +1326,7 @@ static void  *gpio_ir_thread(void *arg)
 			module_key_ctl_write(GPIO_PB17,ENABLE);
 			module_key_ctl_write(GPIO_PB27,DISABLE);
 		}
-	
+
 	}
 
 	close(fp);
@@ -1238,7 +1337,7 @@ static void  *gpio_ir_thread(void *arg)
 int module_key_process(void)
 {
 	int ret = 0;
-	
+
 	static pthread_t gpio_ir_pid;
 	pthread_attr_t gpio_ir_attr;
 	pthread_attr_init(&gpio_ir_attr);
@@ -1249,6 +1348,6 @@ int module_key_process(void)
 		printf("ERROR(%s): create thread for key_monitor_thread failed!\n", TAG_KEY);
 		return -1;
 	}
-	
+
 	return 0;
 }
