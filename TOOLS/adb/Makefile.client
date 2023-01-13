@@ -1,0 +1,63 @@
+# CONFIG_UCLIBC_BUILD=y
+
+CROSS_COMPILE ?= mips-linux-gnu-
+CC = $(CROSS_COMPILE)gcc
+CPLUSPLUS = $(CROSS_COMPILE)g++
+
+ 
+EXEC = adbd
+OBJS = adb.o \
+       backup_service.o \
+       fdevent.o \
+       transport.o \
+       transport_local.o \
+       transport_usb.o \
+       sockets.o \
+       services.o \
+       file_sync_service.o \
+       jdwp_service.o \
+       framebuffer_service.o \
+       remount_service.o \
+       usb_linux_client.o \
+       log_service.o \
+       properties.o \
+       socket_inaddr_any_server.o \
+       socket_local_client.o \
+       socket_local_server.o \
+       socket_loopback_server.o \
+       socket_loopback_client.o \
+       utils.o
+
+FLTFLAGS += -s 8192
+
+
+CFLAGS +=  -g  -Wall -Wno-unused-parameter -march=mips32r2\
+            -D_XOPEN_SOURCE -D_GNU_SOURCE -DALLOW_ADBD_ROOT=1 -I. \
+			
+# CFLAGS +=  -g  -Wall -Wno-unused-parameter -march=mips32r2 -I.
+LDFLAG += -Wl,-gc-sections
+
+
+LIBUTIL += -lutil $(LDLIBS)  -lpthread -lm -lrt -ldl
+
+
+ifeq ($(CONFIG_UCLIBC_BUILD), y)
+	CFLAGS += -muclibc
+	LDFLAG += -muclibc
+endif
+
+
+all: $(EXEC)
+
+$(EXEC): $(OBJS)
+	$(CPLUSPLUS) $(LDFLAG) -o $@ $(OBJS) $(LIBUTIL) 
+	# cp adbd adbd.elf
+
+romfs:
+	$(ROMFSINST) /bin/$(EXEC)
+
+clean:
+	-rm -f $(EXEC) *.elf *.gdb *.o
+
+# $(OBJS): adb_client.h  adb.h  fdevent.h  file_sync_service.h  mutex_list.h  sysdeps.h  transport.h  usb_vendors.h  utils.h
+

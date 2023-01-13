@@ -1,0 +1,425 @@
+aseqnet.o: aseqnet.c \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdc-predef.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdio.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/libc-header-start.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/features.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/cdefs.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/wordsize.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sgidefs.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/long-double.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/gnu/stubs.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/gnu/stubs-o32_hard_2008.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/lib/gcc/mips-linux-gnu/7.2.0/include/stddef.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/lib/gcc/mips-linux-gnu/7.2.0/include/stdarg.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/timesize.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/typesizes.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/time64.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__fpos_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__mbstate_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__fpos64_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__FILE.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/FILE.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_FILE.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdio_lim.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sys_errlist.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdio.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdlib.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/waitflags.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/waitstatus.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/floatn.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/floatn-common.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/types.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/clock_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/clockid_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/time_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/timer_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdint-intn.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/endian.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/endian.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/byteswap.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/uintn-identity.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/select.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/select.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sigset_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__sigset_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_timeval.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_timespec.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/pthreadtypes.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/thread-shared-types.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/pthreadtypes-arch.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/alloca.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdlib-bsearch.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdlib-float.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/ctype.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/locale_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__locale_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/string.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/strings.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/netinet/in.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdint-uintn.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/socket.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_iovec.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/socket.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/socket_type.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sockaddr.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/socket.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/sockios.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/ioctl.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm-generic/ioctl.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_osockaddr.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/in.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/arpa/inet.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/netdb.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/rpc/netdb.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/netdb.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/locale.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/locale.h \
+ /system/alsa/include/alsa/asoundlib.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/unistd.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/posix_opt.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/environments.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/confname.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/getopt_posix.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/getopt_core.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/fcntl.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/fcntl.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/fcntl-linux.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stat.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/assert.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/poll.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/poll.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/poll.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/errno.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/errno.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/linux/errno.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/errno.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm-generic/errno-base.h \
+ /system/alsa/include/alsa/asoundef.h /system/alsa/include/alsa/version.h \
+ /system/alsa/include/alsa/global.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/time.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/time.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_tm.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_itimerspec.h \
+ /system/alsa/include/alsa/input.h /system/alsa/include/alsa/output.h \
+ /system/alsa/include/alsa/error.h /system/alsa/include/alsa/conf.h \
+ /system/alsa/include/alsa/pcm.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/lib/gcc/mips-linux-gnu/7.2.0/include/stdint.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdint.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/wchar.h \
+ /system/alsa/include/alsa/rawmidi.h /system/alsa/include/alsa/timer.h \
+ /system/alsa/include/alsa/hwdep.h /system/alsa/include/alsa/control.h \
+ /system/alsa/include/alsa/mixer.h /system/alsa/include/alsa/seq_event.h \
+ /system/alsa/include/alsa/seq.h /system/alsa/include/alsa/seqmid.h \
+ /system/alsa/include/alsa/seq_midi_event.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/getopt.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/getopt_ext.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/signal.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/signum.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/signum-generic.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sig_atomic_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/siginfo_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__sigval_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/siginfo-arch.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/siginfo-consts.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sigval_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sigevent_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigevent-consts.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigaction.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigcontext.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/stack_t.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/ucontext.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigstack.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/ss_flags.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_sigstack.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigthread.h \
+ ../../include/aconfig.h ../../include/gettext.h \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/libintl.h
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdc-predef.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdio.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/libc-header-start.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/features.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/cdefs.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/wordsize.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sgidefs.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/long-double.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/gnu/stubs.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/gnu/stubs-o32_hard_2008.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/lib/gcc/mips-linux-gnu/7.2.0/include/stddef.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/lib/gcc/mips-linux-gnu/7.2.0/include/stdarg.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/timesize.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/typesizes.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/time64.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__fpos_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__mbstate_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__fpos64_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__FILE.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/FILE.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_FILE.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdio_lim.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sys_errlist.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdio.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdlib.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/waitflags.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/waitstatus.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/floatn.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/floatn-common.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/types.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/clock_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/clockid_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/time_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/timer_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdint-intn.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/endian.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/endian.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/byteswap.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/uintn-identity.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/select.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/select.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sigset_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__sigset_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_timeval.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_timespec.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/pthreadtypes.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/thread-shared-types.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/pthreadtypes-arch.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/alloca.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdlib-bsearch.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdlib-float.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/ctype.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/locale_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__locale_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/string.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/strings.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/netinet/in.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stdint-uintn.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/socket.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_iovec.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/socket.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/socket_type.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sockaddr.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/socket.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/sockios.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/ioctl.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm-generic/ioctl.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_osockaddr.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/in.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/arpa/inet.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/netdb.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/rpc/netdb.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/netdb.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/locale.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/locale.h:
+
+/system/alsa/include/alsa/asoundlib.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/unistd.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/posix_opt.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/environments.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/confname.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/getopt_posix.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/getopt_core.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/fcntl.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/fcntl.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/fcntl-linux.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/stat.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/assert.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/poll.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/poll.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/poll.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/errno.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/errno.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/linux/errno.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm/errno.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/asm-generic/errno-base.h:
+
+/system/alsa/include/alsa/asoundef.h:
+
+/system/alsa/include/alsa/version.h:
+
+/system/alsa/include/alsa/global.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/time.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/time.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_tm.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_itimerspec.h:
+
+/system/alsa/include/alsa/input.h:
+
+/system/alsa/include/alsa/output.h:
+
+/system/alsa/include/alsa/error.h:
+
+/system/alsa/include/alsa/conf.h:
+
+/system/alsa/include/alsa/pcm.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/lib/gcc/mips-linux-gnu/7.2.0/include/stdint.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdint.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/wchar.h:
+
+/system/alsa/include/alsa/rawmidi.h:
+
+/system/alsa/include/alsa/timer.h:
+
+/system/alsa/include/alsa/hwdep.h:
+
+/system/alsa/include/alsa/control.h:
+
+/system/alsa/include/alsa/mixer.h:
+
+/system/alsa/include/alsa/seq_event.h:
+
+/system/alsa/include/alsa/seq.h:
+
+/system/alsa/include/alsa/seqmid.h:
+
+/system/alsa/include/alsa/seq_midi_event.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/getopt.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/getopt_ext.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/signal.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/signum.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/signum-generic.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sig_atomic_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/siginfo_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/__sigval_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/siginfo-arch.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/siginfo-consts.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sigval_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/sigevent_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigevent-consts.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigaction.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigcontext.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/stack_t.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/sys/ucontext.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigstack.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/ss_flags.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/types/struct_sigstack.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/bits/sigthread.h:
+
+../../include/aconfig.h:
+
+../../include/gettext.h:
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/libintl.h:

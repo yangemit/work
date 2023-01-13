@@ -1,0 +1,4 @@
+hwdep_symbols.lo: hwdep_symbols.c \
+ /opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdc-predef.h
+
+/opt/mips-gcc720-glibc229-r5.1.4/mips-linux-gnu/libc/usr/include/stdc-predef.h:

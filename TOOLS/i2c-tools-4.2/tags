@@ -1,0 +1,512 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AR	Makefile	/^AR	:= $(CROSS_COMPLIE)ar$/;"	m
+BIGENDIAN	eeprom/decode-dimms	/^use constant BIGENDIAN		=> "big-endian";$/;"	c
+BIGENDIAN	out/bin/decode-dimms	/^use constant BIGENDIAN		=> "big-endian";$/;"	c
+BUILD_DYNAMIC_LIB	Makefile	/^BUILD_DYNAMIC_LIB ?= 1$/;"	m
+BUILD_STATIC_LIB	Makefile	/^BUILD_STATIC_LIB := 1$/;"	m
+BUILD_STATIC_LIB	Makefile	/^BUILD_STATIC_LIB ?= 1$/;"	m
+BUNCH	tools/i2cbusses.c	115;"	d	file:
+BYTES_PER_PAGE	eepromer/eeprom.c	26;"	d	file:
+CC	Makefile	/^CC	:= $(CROSS_COMPLIE)gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS		?= -O2$/;"	m
+CFLAGS	eepromer/Makefile	/^CFLAGS = -O2 -I..\/include -Wall$/;"	m
+CHECK_I2C_FUNC	eeprog/24cXX.c	71;"	d	file:
+CROSS_COMPLIE	Makefile	/^CROSS_COMPLIE := mips-linux-gnu-$/;"	m
+DDR3_CLOCKED	eeprom/decode-dimms	/^use constant DDR3_CLOCKED	=> 3;$/;"	c
+DDR3_CLOCKED	out/bin/decode-dimms	/^use constant DDR3_CLOCKED	=> 3;$/;"	c
+DDR3_LOAD_REDUCED	eeprom/decode-dimms	/^use constant DDR3_LOAD_REDUCED	=> 4;$/;"	c
+DDR3_LOAD_REDUCED	out/bin/decode-dimms	/^use constant DDR3_LOAD_REDUCED	=> 4;$/;"	c
+DDR3_REGISTERED	eeprom/decode-dimms	/^use constant DDR3_REGISTERED	=> 2;$/;"	c
+DDR3_REGISTERED	out/bin/decode-dimms	/^use constant DDR3_REGISTERED	=> 2;$/;"	c
+DDR3_UNBUFFERED	eeprom/decode-dimms	/^use constant DDR3_UNBUFFERED	=> 1;$/;"	c
+DDR3_UNBUFFERED	out/bin/decode-dimms	/^use constant DDR3_UNBUFFERED	=> 1;$/;"	c
+DDR4_LOAD_REDUCED	eeprom/decode-dimms	/^use constant DDR4_LOAD_REDUCED	=> 4;$/;"	c
+DDR4_LOAD_REDUCED	out/bin/decode-dimms	/^use constant DDR4_LOAD_REDUCED	=> 4;$/;"	c
+DDR4_REGISTERED	eeprom/decode-dimms	/^use constant DDR4_REGISTERED	=> 2;$/;"	c
+DDR4_REGISTERED	out/bin/decode-dimms	/^use constant DDR4_REGISTERED	=> 2;$/;"	c
+DDR4_UNBUFFERED	eeprom/decode-dimms	/^use constant DDR4_UNBUFFERED	=> 1;$/;"	c
+DDR4_UNBUFFERED	out/bin/decode-dimms	/^use constant DDR4_UNBUFFERED	=> 1;$/;"	c
+DEFAULT_EEPROM_ADDR	eepromer/eeprom.c	24;"	d	file:
+DEFAULT_I2C_BUS	eepromer/eeprom.c	23;"	d	file:
+DEFAULT_NUM_PAGES	eepromer/eeprom.c	25;"	d	file:
+DESTDIR	Makefile	/^DESTDIR	?=$/;"	m
+DISTUTILS	py-smbus/Module.mk	/^DISTUTILS := \\$/;"	m
+EEPROG_DIR	eeprog/Module.mk	/^EEPROG_DIR	:= eeprog$/;"	m
+EEPROG_TARGETS	eeprog/Module.mk	/^EEPROG_TARGETS	:= eeprog$/;"	m
+EEPROM_DIR	eeprom/Module.mk	/^EEPROM_DIR	:= eeprom$/;"	m
+EEPROM_MANPAGES	eeprom/Module.mk	/^EEPROM_MANPAGES	:= decode-dimms.1 decode-vaio.1$/;"	m
+EEPROM_SIZE	eepromer/eepromer.c	14;"	d	file:
+EEPROM_TARGETS	eeprom/Module.mk	/^EEPROM_TARGETS	:= decode-dimms decode-vaio ddcmon decode-edid$/;"	m
+EEPROM_TYPE_16BIT_ADDR	eeprog/24cXX.h	20;"	d
+EEPROM_TYPE_8BIT_ADDR	eeprog/24cXX.h	19;"	d
+EEPROM_TYPE_UNKNOWN	eeprog/24cXX.h	18;"	d
+ENV_DEV	eeprog/eeprog.c	27;"	d	file:
+ENV_I2C_ADDR	eeprog/eeprog.c	28;"	d	file:
+ERASE	eepromer/eepromer.c	17;"	d	file:
+EXTRA	Makefile	/^EXTRA	:=$/;"	m
+FORCE	eepromer/eepromer.c	22;"	d	file:
+HEAD_SIZE	eepromer/eepromer.c	20;"	d	file:
+I2C_API_VERSION	include/i2c/smbus.h	17;"	d
+I2C_API_VERSION	out/include/i2c/smbus.h	17;"	d
+I2C_FUNC_SMBUS_PEC	lib/smbus.c	27;"	d	file:
+I2C_SMBUS_I2C_BLOCK_BROKEN	lib/smbus.c	24;"	d	file:
+I2C_SMBUS_I2C_BLOCK_BROKEN	py-smbus/smbusmodule.c	35;"	d	file:
+I2C_SMBUS_I2C_BLOCK_DATA	py-smbus/smbusmodule.c	34;"	d	file:
+I2C_SMBUS_I2C_BLOCK_DATA	py-smbus/smbusmodule.c	36;"	d	file:
+I2C_TOOLS_VER	eeprom/decode-dimms	/^use constant I2C_TOOLS_VER	=> "4.2";$/;"	c
+I2C_TOOLS_VER	out/bin/decode-dimms	/^use constant I2C_TOOLS_VER	=> "4.2";$/;"	c
+INCLUDE_DIR	include/Module.mk	/^INCLUDE_DIR	:= include$/;"	m
+INCLUDE_TARGETS	include/Module.mk	/^INCLUDE_TARGETS	:= i2c\/smbus.h$/;"	m
+INIT_FNAME	py-smbus/smbusmodule.c	/^INIT_FNAME(void)$/;"	f
+INIT_FNAME	py-smbus/smbusmodule.c	712;"	d	file:
+INIT_FNAME	py-smbus/smbusmodule.c	718;"	d	file:
+INIT_RETURN	py-smbus/smbusmodule.c	711;"	d	file:
+INIT_RETURN	py-smbus/smbusmodule.c	717;"	d	file:
+INSTALL	Makefile	/^INSTALL		:= install$/;"	m
+INSTALL_DATA	Makefile	/^INSTALL_DATA	:= $(INSTALL) -m 644$/;"	m
+INSTALL_DIR	Makefile	/^INSTALL_DIR	:= $(INSTALL) -m 755 -d$/;"	m
+INSTALL_PROGRAM	Makefile	/^INSTALL_PROGRAM	:= $(INSTALL) -m 755$/;"	m
+KERNELVERSION	Makefile	/^KERNELVERSION	:= $(shell uname -r)$/;"	m
+LIB_DEPS	lib/Module.mk	/^LIB_DEPS	:= $(LIB_DIR)\/$(LIB_SHBASENAME)$/;"	m
+LIB_DEPS	lib/Module.mk	/^LIB_DEPS	:= $(LIB_DIR)\/$(LIB_STLIBNAME)$/;"	m
+LIB_DIR	lib/Module.mk	/^LIB_DIR		:= lib$/;"	m
+LIB_I2C_SMBUS_H	include/i2c/smbus.h	15;"	d
+LIB_I2C_SMBUS_H	out/include/i2c/smbus.h	15;"	d
+LIB_LINKS	lib/Module.mk	/^LIB_LINKS	:= $(LIB_SHSONAME) $(LIB_SHBASENAME)$/;"	m
+LIB_MAINVER	lib/Module.mk	/^LIB_MAINVER	:= 0$/;"	m
+LIB_MINORVER	lib/Module.mk	/^LIB_MINORVER	:= 1.1$/;"	m
+LIB_SHBASENAME	lib/Module.mk	/^LIB_SHBASENAME	:= libi2c.so$/;"	m
+LIB_SHLIBNAME	lib/Module.mk	/^LIB_SHLIBNAME	:= $(LIB_SHBASENAME).$(LIB_VER)$/;"	m
+LIB_SHSONAME	lib/Module.mk	/^LIB_SHSONAME	:= $(LIB_SHBASENAME).$(LIB_MAINVER)$/;"	m
+LIB_STLIBNAME	lib/Module.mk	/^LIB_STLIBNAME	:= libi2c.a$/;"	m
+LIB_TARGETS	lib/Module.mk	/^LIB_TARGETS	:=$/;"	m
+LIB_VER	lib/Module.mk	/^LIB_VER		:= $(LIB_MAINVER).$(LIB_MINORVER)$/;"	m
+LITTLEENDIAN	eeprom/decode-dimms	/^use constant LITTLEENDIAN	=> "little-endian";$/;"	c
+LITTLEENDIAN	out/bin/decode-dimms	/^use constant LITTLEENDIAN	=> "little-endian";$/;"	c
+LN	Makefile	/^LN		:= ln -sf$/;"	m
+MAXPATH	py-smbus/smbusmodule.c	105;"	d	file:
+MAX_BLK_SIZE	eepromer/eepromer.c	13;"	d	file:
+MAX_BYTES	eepromer/eeprom.c	27;"	d	file:
+MISSING_FUNC_FMT	tools/i2cbusses.h	42;"	d
+MODE_AUTO	tools/i2cdetect.c	35;"	d	file:
+MODE_FUNC	tools/i2cdetect.c	38;"	d	file:
+MODE_QUICK	tools/i2cdetect.c	36;"	d	file:
+MODE_READ	tools/i2cdetect.c	37;"	d	file:
+ONLYROOT	eeprom/decode-vaio	/^use constant ONLYROOT	=> "Readable only by root";$/;"	c
+ONLYROOT	out/bin/decode-vaio	/^use constant ONLYROOT	=> "Readable only by root";$/;"	c
+OUTER_LOOP	out/sbin/i2c-stub-from-dump	/^ OUTER_LOOP:$/;"	l
+OUTER_LOOP	stub/i2c-stub-from-dump	/^ OUTER_LOOP:$/;"	l
+PARSE_GET_DATA	tools/i2ctransfer.c	/^	PARSE_GET_DATA,$/;"	e	enum:parse_state	file:
+PARSE_GET_DESC	tools/i2ctransfer.c	/^	PARSE_GET_DESC,$/;"	e	enum:parse_state	file:
+PHEADER	eepromer/eepromer.c	18;"	d	file:
+POK	eepromer/eepromer.c	646;"	d	file:
+PREFIX	Makefile	/^PREFIX	?= $(PWD)\/out$/;"	m
+PRINT_HEADER	tools/i2ctransfer.c	40;"	d	file:
+PRINT_READ_BUF	tools/i2ctransfer.c	38;"	d	file:
+PRINT_STDERR	tools/i2ctransfer.c	37;"	d	file:
+PRINT_WRITE_BUF	tools/i2ctransfer.c	39;"	d	file:
+PROCFS	eeprom/decode-edid	/^use constant PROCFS => 1;$/;"	c
+PROCFS	out/bin/decode-edid	/^use constant PROCFS => 1;$/;"	c
+PYTHON	py-smbus/Module.mk	/^PYTHON ?= python$/;"	m
+PY_SMBUS_DIR	py-smbus/Module.mk	/^PY_SMBUS_DIR := py-smbus$/;"	m
+PyMODINIT_FUNC	py-smbus/smbusmodule.c	722;"	d	file:
+READ	eepromer/eepromer.c	15;"	d	file:
+RM	Makefile	/^RM		:= rm -f$/;"	m
+SMBus	py-smbus/smbusmodule.c	/^} SMBus;$/;"	t	typeref:struct:__anon1	file:
+SMBusModule	py-smbus/smbusmodule.c	/^static struct PyModuleDef SMBusModule = {$/;"	v	typeref:struct:PyModuleDef	file:
+SMBus_SET_ADDR	py-smbus/smbusmodule.c	173;"	d	file:
+SMBus_block_process_call	py-smbus/smbusmodule.c	/^SMBus_block_process_call(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_buf_to_list	py-smbus/smbusmodule.c	/^SMBus_buf_to_list(__u8 const *buf, int len)$/;"	f	file:
+SMBus_close	py-smbus/smbusmodule.c	/^SMBus_close(SMBus *self)$/;"	f	file:
+SMBus_dealloc	py-smbus/smbusmodule.c	/^SMBus_dealloc(SMBus *self)$/;"	f	file:
+SMBus_get_pec	py-smbus/smbusmodule.c	/^SMBus_get_pec(SMBus *self, void *closure)$/;"	f	file:
+SMBus_getset	py-smbus/smbusmodule.c	/^static PyGetSetDef SMBus_getset[] = {$/;"	v	file:
+SMBus_init	py-smbus/smbusmodule.c	/^SMBus_init(SMBus *self, PyObject *args, PyObject *kwds)$/;"	f	file:
+SMBus_list_to_data	py-smbus/smbusmodule.c	/^SMBus_list_to_data(PyObject *list, union i2c_smbus_data *data)$/;"	f	file:
+SMBus_methods	py-smbus/smbusmodule.c	/^static PyMethodDef SMBus_methods[] = {$/;"	v	file:
+SMBus_module_methods	py-smbus/smbusmodule.c	/^static PyMethodDef SMBus_module_methods[] = {$/;"	v	file:
+SMBus_new	py-smbus/smbusmodule.c	/^SMBus_new(PyTypeObject *type, PyObject *args, PyObject *kwds)$/;"	f	file:
+SMBus_open	py-smbus/smbusmodule.c	/^SMBus_open(SMBus *self, PyObject *args, PyObject *kwds)$/;"	f	file:
+SMBus_process_call	py-smbus/smbusmodule.c	/^SMBus_process_call(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_read_block_data	py-smbus/smbusmodule.c	/^SMBus_read_block_data(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_read_byte	py-smbus/smbusmodule.c	/^SMBus_read_byte(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_read_byte_data	py-smbus/smbusmodule.c	/^SMBus_read_byte_data(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_read_i2c_block_data	py-smbus/smbusmodule.c	/^SMBus_read_i2c_block_data(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_read_word_data	py-smbus/smbusmodule.c	/^SMBus_read_word_data(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_set_addr	py-smbus/smbusmodule.c	/^SMBus_set_addr(SMBus *self, int addr)$/;"	f	file:
+SMBus_set_pec	py-smbus/smbusmodule.c	/^SMBus_set_pec(SMBus *self, PyObject *val, void *closure)$/;"	f	file:
+SMBus_type	py-smbus/smbusmodule.c	/^static PyTypeObject SMBus_type = {$/;"	v	file:
+SMBus_write_block_data	py-smbus/smbusmodule.c	/^SMBus_write_block_data(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_write_byte	py-smbus/smbusmodule.c	/^SMBus_write_byte(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_write_byte_data	py-smbus/smbusmodule.c	/^SMBus_write_byte_data(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_write_i2c_block_data	py-smbus/smbusmodule.c	/^SMBus_write_i2c_block_data(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_write_quick	py-smbus/smbusmodule.c	/^SMBus_write_quick(SMBus *self, PyObject *args)$/;"	f	file:
+SMBus_write_word_data	py-smbus/smbusmodule.c	/^SMBus_write_word_data(SMBus *self, PyObject *args)$/;"	f	file:
+SOCFLAGS	Makefile	/^SOCFLAGS	:= -fpic -D_REENTRANT $(CFLAGS)$/;"	m
+SRCDIRS	Makefile	/^SRCDIRS	:= include lib eeprom stub tools $(EXTRA)$/;"	m
+START_ADDR	eepromer/eepromer.c	21;"	d	file:
+STRIP	Makefile	/^STRIP	:= $(CROSS_COMPLIE)strip$/;"	m
+STUB_DIR	stub/Module.mk	/^STUB_DIR	:= stub$/;"	m
+SYSFS	eeprom/decode-edid	/^use constant SYSFS  => 2;$/;"	c
+SYSFS	out/bin/decode-edid	/^use constant SYSFS  => 2;$/;"	c
+TOOLS_DIR	tools/Module.mk	/^TOOLS_DIR	:= tools$/;"	m
+TOOLS_TARGETS	tools/Module.mk	/^TOOLS_TARGETS	:= i2cdetect i2cdump i2cset i2cget i2ctransfer$/;"	m
+USE_STATIC_LIB	Makefile	/^USE_STATIC_LIB := 1$/;"	m
+USE_STATIC_LIB	Makefile	/^USE_STATIC_LIB ?= 1$/;"	m
+VER	eepromer/eepromer.c	19;"	d	file:
+VERSION	eeprog/eeprog.c	25;"	d	file:
+VERSION	eeprom/decode-vaio	/^use constant VERSION	=> "1.7";$/;"	c
+VERSION	out/bin/decode-vaio	/^use constant VERSION	=> "1.7";$/;"	c
+VERSION	version.h	1;"	d
+WARNINC	eepromer/eepromer.c	29;"	d	file:
+WRITE	eepromer/eepromer.c	16;"	d	file:
+WRITE_DELAY_US	eeprog/24cXX.c	34;"	d	file:
+_24CXX_H_	eeprog/24cXX.h	15;"	d
+_BSD_SOURCE	tools/i2cbusses.c	26;"	d	file:
+_DEFAULT_SOURCE	tools/i2cbusses.c	27;"	d	file:
+_I2CBUSSES_H	tools/i2cbusses.h	23;"	d
+_UTIL_H	tools/util.h	22;"	d
+adap_type	tools/i2cbusses.c	/^struct adap_type {$/;"	s	file:
+adap_types	tools/i2cbusses.c	/^static struct adap_type adap_types[5] = {$/;"	v	typeref:struct:adap_type	file:
+add_standard_timing	eeprom/ddcmon	/^sub add_standard_timing$/;"	s
+add_standard_timing	out/bin/ddcmon	/^sub add_standard_timing$/;"	s
+add_timing	eeprom/ddcmon	/^sub add_timing$/;"	s
+add_timing	out/bin/ddcmon	/^sub add_timing$/;"	s
+addr	eeprog/24cXX.h	/^	int addr;	\/\/ i2c address$/;"	m	struct:eeprom
+addr	py-smbus/smbusmodule.c	/^	int addr;	\/* current client SMBus address *\/$/;"	m	struct:__anon1	file:
+adt	tools/i2cbusses.c	/^enum adt { adt_dummy, adt_isa, adt_i2c, adt_smbus, adt_unknown };$/;"	g	file:
+adt_dummy	tools/i2cbusses.c	/^enum adt { adt_dummy, adt_isa, adt_i2c, adt_smbus, adt_unknown };$/;"	e	enum:adt	file:
+adt_i2c	tools/i2cbusses.c	/^enum adt { adt_dummy, adt_isa, adt_i2c, adt_smbus, adt_unknown };$/;"	e	enum:adt	file:
+adt_isa	tools/i2cbusses.c	/^enum adt { adt_dummy, adt_isa, adt_i2c, adt_smbus, adt_unknown };$/;"	e	enum:adt	file:
+adt_smbus	tools/i2cbusses.c	/^enum adt { adt_dummy, adt_isa, adt_i2c, adt_smbus, adt_unknown };$/;"	e	enum:adt	file:
+adt_unknown	tools/i2cbusses.c	/^enum adt { adt_dummy, adt_isa, adt_i2c, adt_smbus, adt_unknown };$/;"	e	enum:adt	file:
+algo	tools/i2cbusses.c	/^	const char* algo;$/;"	m	struct:adap_type	file:
+algo	tools/i2cbusses.h	/^	const char *algo;$/;"	m	struct:i2c_adap
+all_func	tools/i2cdetect.c	/^static const struct func all_func[] = {$/;"	v	typeref:struct:func	file:
+as_ddr	eeprom/decode-dimms	/^sub as_ddr($$)$/;"	s
+as_ddr	out/bin/decode-dimms	/^sub as_ddr($$)$/;"	s
+author	py-smbus/setup.py	/^	author="Mark M. Hoffman",$/;"	v
+author_email	py-smbus/setup.py	/^	author_email="mhoffman@lightlink.com",$/;"	v
+bar	eepromer/eepromer.c	/^void bar(void){$/;"	f
+bindir	Makefile	/^bindir	= $(PREFIX)\/bin$/;"	m
+block_read	eepromer/eepromer.c	/^int block_read(int file,int dev_addr,int eeprom_addr,unsigned char *buf){$/;"	f
+block_write	eepromer/eepromer.c	/^int block_write(int file,int dev_addr,int eeprom_addr,unsigned char *buf,int lenght){$/;"	f
+bus_detect	eeprom/decode-edid	/^sub bus_detect$/;"	s
+bus_detect	out/bin/decode-edid	/^sub bus_detect$/;"	s
+calculate_crc	eeprom/decode-dimms	/^sub calculate_crc($$$)$/;"	s
+calculate_crc	out/bin/decode-dimms	/^sub calculate_crc($$$)$/;"	s
+cas_latencies	eeprom/decode-dimms	/^sub cas_latencies(@)$/;"	s
+cas_latencies	out/bin/decode-dimms	/^sub cas_latencies(@)$/;"	s
+check_chip_addr	out/sbin/i2c-stub-from-dump	/^sub check_chip_addr {$/;"	s
+check_chip_addr	stub/i2c-stub-from-dump	/^sub check_chip_addr {$/;"	s
+check_crc	eeprom/decode-dimms	/^sub check_crc($)$/;"	s
+check_crc	out/bin/decode-dimms	/^sub check_crc($)$/;"	s
+check_funcs	tools/i2cdump.c	/^static int check_funcs(int file, int size, int pec)$/;"	f	file:
+check_funcs	tools/i2cget.c	/^static int check_funcs(int file, int size, int daddress, int pec)$/;"	f	file:
+check_funcs	tools/i2cset.c	/^static int check_funcs(int file, int size, int pec)$/;"	f	file:
+check_funcs	tools/i2ctransfer.c	/^static int check_funcs(int file)$/;"	f	file:
+checksum	eeprom/decode-dimms	/^sub checksum($)$/;"	s
+checksum	out/bin/decode-dimms	/^sub checksum($)$/;"	s
+confirm	tools/i2cget.c	/^static int confirm(const char *filename, int address, int size, int daddress,$/;"	f	file:
+confirm	tools/i2cset.c	/^static int confirm(const char *filename, int address, int size, int daddress,$/;"	f	file:
+confirm	tools/i2ctransfer.c	/^static int confirm(const char *filename, struct i2c_msg *msgs, __u32 nmsgs)$/;"	f	file:
+confirm_action	eeprog/eeprog.c	/^int confirm_action()$/;"	f
+content_read	eepromer/eepromer.c	/^int content_read(int file, int addr){$/;"	f
+content_write	eepromer/eepromer.c	/^int content_write(int file, int addr){$/;"	f
+data	eepromer/eepromer.c	/^			char    data[56];$/;"	m	struct:mini_inode	file:
+data_len	eepromer/eepromer.c	/^			int		data_len;$/;"	m	struct:mini_inode	file:
+ddr2_module_types	eeprom/decode-dimms	/^sub ddr2_module_types($)$/;"	s
+ddr2_module_types	out/bin/decode-dimms	/^sub ddr2_module_types($)$/;"	s
+ddr2_refresh_rate	eeprom/decode-dimms	/^sub ddr2_refresh_rate($)$/;"	s
+ddr2_refresh_rate	out/bin/decode-dimms	/^sub ddr2_refresh_rate($)$/;"	s
+ddr2_sdram_atime	eeprom/decode-dimms	/^sub ddr2_sdram_atime($)$/;"	s
+ddr2_sdram_atime	out/bin/decode-dimms	/^sub ddr2_sdram_atime($)$/;"	s
+ddr2_sdram_ctime	eeprom/decode-dimms	/^sub ddr2_sdram_ctime($)$/;"	s
+ddr2_sdram_ctime	out/bin/decode-dimms	/^sub ddr2_sdram_ctime($)$/;"	s
+ddr2_sdram_rtime	eeprom/decode-dimms	/^sub ddr2_sdram_rtime($$$)$/;"	s
+ddr2_sdram_rtime	out/bin/decode-dimms	/^sub ddr2_sdram_rtime($$$)$/;"	s
+ddr3_adjust_ctime	eeprom/decode-dimms	/^sub ddr3_adjust_ctime($$)$/;"	s
+ddr3_adjust_ctime	out/bin/decode-dimms	/^sub ddr3_adjust_ctime($$)$/;"	s
+ddr3_device_type	eeprom/decode-dimms	/^sub ddr3_device_type($)$/;"	s
+ddr3_device_type	out/bin/decode-dimms	/^sub ddr3_device_type($)$/;"	s
+ddr3_mtb_ftb	eeprom/decode-dimms	/^sub ddr3_mtb_ftb($$$$)$/;"	s
+ddr3_mtb_ftb	out/bin/decode-dimms	/^sub ddr3_mtb_ftb($$$$)$/;"	s
+ddr3_reference_card	eeprom/decode-dimms	/^sub ddr3_reference_card($$)$/;"	s
+ddr3_reference_card	out/bin/decode-dimms	/^sub ddr3_reference_card($$)$/;"	s
+ddr3_revision_number	eeprom/decode-dimms	/^sub ddr3_revision_number($)$/;"	s
+ddr3_revision_number	out/bin/decode-dimms	/^sub ddr3_revision_number($)$/;"	s
+ddr4_core_timings	eeprom/decode-dimms	/^sub ddr4_core_timings($$$$$)$/;"	s
+ddr4_core_timings	out/bin/decode-dimms	/^sub ddr4_core_timings($$$$$)$/;"	s
+ddr4_mtb_ftb	eeprom/decode-dimms	/^sub ddr4_mtb_ftb($$$$)$/;"	s
+ddr4_mtb_ftb	out/bin/decode-dimms	/^sub ddr4_mtb_ftb($$$$)$/;"	s
+ddr_core_timings	eeprom/decode-dimms	/^sub ddr_core_timings($$$$$)$/;"	s
+ddr_core_timings	out/bin/decode-dimms	/^sub ddr_core_timings($$$$$)$/;"	s
+decode_ddr2_sdram	eeprom/decode-dimms	/^sub decode_ddr2_sdram($)$/;"	s
+decode_ddr2_sdram	out/bin/decode-dimms	/^sub decode_ddr2_sdram($)$/;"	s
+decode_ddr3_mfg_data	eeprom/decode-dimms	/^sub decode_ddr3_mfg_data($)$/;"	s
+decode_ddr3_mfg_data	out/bin/decode-dimms	/^sub decode_ddr3_mfg_data($)$/;"	s
+decode_ddr3_sdram	eeprom/decode-dimms	/^sub decode_ddr3_sdram($)$/;"	s
+decode_ddr3_sdram	out/bin/decode-dimms	/^sub decode_ddr3_sdram($)$/;"	s
+decode_ddr4_mfg_data	eeprom/decode-dimms	/^sub decode_ddr4_mfg_data($)$/;"	s
+decode_ddr4_mfg_data	out/bin/decode-dimms	/^sub decode_ddr4_mfg_data($)$/;"	s
+decode_ddr4_sdram	eeprom/decode-dimms	/^sub decode_ddr4_sdram($)$/;"	s
+decode_ddr4_sdram	out/bin/decode-dimms	/^sub decode_ddr4_sdram($)$/;"	s
+decode_ddr_sdram	eeprom/decode-dimms	/^sub decode_ddr_sdram($)$/;"	s
+decode_ddr_sdram	out/bin/decode-dimms	/^sub decode_ddr_sdram($)$/;"	s
+decode_direct_rambus	eeprom/decode-dimms	/^sub decode_direct_rambus($)$/;"	s
+decode_direct_rambus	out/bin/decode-dimms	/^sub decode_direct_rambus($)$/;"	s
+decode_hexa	eeprom/decode-vaio	/^sub decode_hexa$/;"	s
+decode_hexa	out/bin/decode-vaio	/^sub decode_hexa$/;"	s
+decode_intel_spec_freq	eeprom/decode-dimms	/^sub decode_intel_spec_freq($)$/;"	s
+decode_intel_spec_freq	out/bin/decode-dimms	/^sub decode_intel_spec_freq($)$/;"	s
+decode_manufacturing_information	eeprom/decode-dimms	/^sub decode_manufacturing_information($)$/;"	s
+decode_manufacturing_information	out/bin/decode-dimms	/^sub decode_manufacturing_information($)$/;"	s
+decode_rambus	eeprom/decode-dimms	/^sub decode_rambus($)$/;"	s
+decode_rambus	out/bin/decode-dimms	/^sub decode_rambus($)$/;"	s
+decode_sdr_sdram	eeprom/decode-dimms	/^sub decode_sdr_sdram($)$/;"	s
+decode_sdr_sdram	out/bin/decode-dimms	/^sub decode_sdr_sdram($)$/;"	s
+decode_string	eeprom/decode-vaio	/^sub decode_string$/;"	s
+decode_string	out/bin/decode-vaio	/^sub decode_string$/;"	s
+decode_uuid	eeprom/decode-vaio	/^sub decode_uuid$/;"	s
+decode_uuid	out/bin/decode-vaio	/^sub decode_uuid$/;"	s
+description	py-smbus/setup.py	/^	description="Python bindings for Linux SMBus access through i2c-dev",$/;"	v
+dev	eeprog/24cXX.h	/^	char *dev; 	\/\/ device file i.e. \/dev\/i2c-N$/;"	m	struct:eeprom
+die_if	eeprog/eeprog.c	77;"	d	file:
+do_die_if	eeprog/eeprog.c	/^void do_die_if(int b, char* msg, int line)$/;"	f
+do_usage_if	eeprog/eeprog.c	/^void do_usage_if(int b, int line)$/;"	f
+edid_decode	eeprom/decode-edid	/^sub edid_decode$/;"	s
+edid_decode	out/bin/decode-edid	/^sub edid_decode$/;"	s
+edid_valid_procfs	eeprom/decode-edid	/^sub edid_valid_procfs$/;"	s
+edid_valid_procfs	out/bin/decode-edid	/^sub edid_valid_procfs$/;"	s
+edid_valid_sysfs	eeprom/decode-edid	/^sub edid_valid_sysfs$/;"	s
+edid_valid_sysfs	out/bin/decode-edid	/^sub edid_valid_sysfs$/;"	s
+eeprom	eeprog/24cXX.h	/^struct eeprom$/;"	s
+eeprom_close	eeprog/24cXX.c	/^int eeprom_close(struct eeprom *e)$/;"	f
+eeprom_open	eeprog/24cXX.c	/^int eeprom_open(char *dev_fqn, int addr, int type, struct eeprom* e)$/;"	f
+eeprom_read	eepromer/eeprom.c	/^int eeprom_read(int fd,$/;"	f
+eeprom_read_byte	eeprog/24cXX.c	/^int eeprom_read_byte(struct eeprom* e, __u16 mem_addr)$/;"	f
+eeprom_read_current_byte	eeprog/24cXX.c	/^int eeprom_read_current_byte(struct eeprom* e)$/;"	f
+eeprom_write	eepromer/eeprom.c	/^int eeprom_write(int fd,$/;"	f
+eeprom_write_byte	eeprog/24cXX.c	/^int eeprom_write_byte(struct eeprom *e, __u16 mem_addr, __u8 data)$/;"	f
+erase	eepromer/eepromer.c	/^void erase(int file, int addr,int eeprom_size){$/;"	f
+ext_modules	py-smbus/setup.py	/^	ext_modules=[Extension($/;"	v
+extra_compile_args	py-smbus/setup.py	/^		extra_compile_args=['-I..\/include'],$/;"	v
+extra_link_args	py-smbus/setup.py	/^		extra_link_args=['-L..\/lib', '-li2c']$/;"	v
+extract_byte	eeprom/ddcmon	/^sub extract_byte$/;"	s
+extract_byte	out/bin/ddcmon	/^sub extract_byte$/;"	s
+extract_color_mode	eeprom/ddcmon	/^sub extract_color_mode$/;"	s
+extract_color_mode	out/bin/ddcmon	/^sub extract_color_mode$/;"	s
+extract_detailed_timings	eeprom/ddcmon	/^sub extract_detailed_timings$/;"	s
+extract_detailed_timings	out/bin/ddcmon	/^sub extract_detailed_timings$/;"	s
+extract_display_input	eeprom/ddcmon	/^sub extract_display_input$/;"	s
+extract_display_input	out/bin/ddcmon	/^sub extract_display_input$/;"	s
+extract_dpms	eeprom/ddcmon	/^sub extract_dpms$/;"	s
+extract_dpms	out/bin/ddcmon	/^sub extract_dpms$/;"	s
+extract_dword	eeprom/ddcmon	/^sub extract_dword$/;"	s
+extract_dword	out/bin/ddcmon	/^sub extract_dword$/;"	s
+extract_manufacturer	eeprom/ddcmon	/^sub extract_manufacturer$/;"	s
+extract_manufacturer	out/bin/ddcmon	/^sub extract_manufacturer$/;"	s
+extract_sesquiword	eeprom/ddcmon	/^sub extract_sesquiword$/;"	s
+extract_sesquiword	out/bin/ddcmon	/^sub extract_sesquiword$/;"	s
+extract_string	eeprom/ddcmon	/^sub extract_string$/;"	s
+extract_string	out/bin/ddcmon	/^sub extract_string$/;"	s
+extract_word	eeprom/ddcmon	/^sub extract_word$/;"	s
+extract_word	out/bin/ddcmon	/^sub extract_word$/;"	s
+fd	eeprog/24cXX.h	/^	int fd;		\/\/ file descriptor$/;"	m	struct:eeprom
+fd	py-smbus/smbusmodule.c	/^	int fd;		\/* open file descriptor: \/dev\/i2c-?, or -1 *\/$/;"	m	struct:__anon1	file:
+find_col_width	eeprom/decode-dimms	/^sub find_col_width($)$/;"	s
+find_col_width	out/bin/decode-dimms	/^sub find_col_width($)$/;"	s
+free_adapters	tools/i2cbusses.c	/^void free_adapters(struct i2c_adap *adapters)$/;"	f
+func	tools/i2cdetect.c	/^struct func$/;"	s	file:
+funcs	tools/i2cbusses.c	/^	const char *funcs;$/;"	m	struct:adap_type	file:
+funcs	tools/i2cbusses.h	/^	const char *funcs;$/;"	m	struct:i2c_adap
+g_quiet	eeprog/eeprog.c	/^int g_quiet;$/;"	v
+gather_i2c_busses	tools/i2cbusses.c	/^struct i2c_adap *gather_i2c_busses(void)$/;"	f
+get_dimm_list	eeprom/decode-dimms	/^sub get_dimm_list$/;"	s
+get_dimm_list	out/bin/decode-dimms	/^sub get_dimm_list$/;"	s
+get_edid_procfs	eeprom/ddcmon	/^sub get_edid_procfs$/;"	s
+get_edid_procfs	out/bin/ddcmon	/^sub get_edid_procfs$/;"	s
+get_edid_sysfs	eeprom/ddcmon	/^sub get_edid_sysfs$/;"	s
+get_edid_sysfs	out/bin/ddcmon	/^sub get_edid_sysfs$/;"	s
+get_i2c_stub_bus_number	out/sbin/i2c-stub-from-dump	/^sub get_i2c_stub_bus_number$/;"	s
+get_i2c_stub_bus_number	stub/i2c-stub-from-dump	/^sub get_i2c_stub_bus_number$/;"	s
+good_signature	eeprom/ddcmon	/^sub good_signature$/;"	s
+good_signature	out/bin/ddcmon	/^sub good_signature$/;"	s
+help	eepromer/eepromer.c	/^void help(void)                                                                 $/;"	f
+help	tools/i2cdetect.c	/^static void help(void)$/;"	f	file:
+help	tools/i2cdump.c	/^static void help(void)$/;"	f	file:
+help	tools/i2cget.c	/^static void help(void)$/;"	f	file:
+help	tools/i2cset.c	/^static void help(void)$/;"	f	file:
+help	tools/i2ctransfer.c	/^static void help(void)$/;"	f	file:
+html_encode	eeprom/decode-dimms	/^sub html_encode($)$/;"	s
+html_encode	out/bin/decode-dimms	/^sub html_encode($)$/;"	s
+i2c_adap	tools/i2cbusses.h	/^struct i2c_adap {$/;"	s
+i2c_get_funcs	tools/i2cbusses.c	/^static enum adt i2c_get_funcs(int i2cbus)$/;"	f	file:
+i2c_smbus_access	lib/smbus.c	/^__s32 i2c_smbus_access(int file, char read_write, __u8 command,$/;"	f
+i2c_smbus_block_process_call	lib/smbus.c	/^__s32 i2c_smbus_block_process_call(int file, __u8 command, __u8 length,$/;"	f
+i2c_smbus_process_call	lib/smbus.c	/^__s32 i2c_smbus_process_call(int file, __u8 command, __u16 value)$/;"	f
+i2c_smbus_read_block_data	lib/smbus.c	/^__s32 i2c_smbus_read_block_data(int file, __u8 command, __u8 *values)$/;"	f
+i2c_smbus_read_byte	lib/smbus.c	/^__s32 i2c_smbus_read_byte(int file)$/;"	f
+i2c_smbus_read_byte_data	lib/smbus.c	/^__s32 i2c_smbus_read_byte_data(int file, __u8 command)$/;"	f
+i2c_smbus_read_i2c_block_data	lib/smbus.c	/^__s32 i2c_smbus_read_i2c_block_data(int file, __u8 command, __u8 length,$/;"	f
+i2c_smbus_read_word_data	lib/smbus.c	/^__s32 i2c_smbus_read_word_data(int file, __u8 command)$/;"	f
+i2c_smbus_write_block_data	lib/smbus.c	/^__s32 i2c_smbus_write_block_data(int file, __u8 command, __u8 length,$/;"	f
+i2c_smbus_write_byte	lib/smbus.c	/^__s32 i2c_smbus_write_byte(int file, __u8 value)$/;"	f
+i2c_smbus_write_byte_data	lib/smbus.c	/^__s32 i2c_smbus_write_byte_data(int file, __u8 command, __u8 value)$/;"	f
+i2c_smbus_write_i2c_block_data	lib/smbus.c	/^__s32 i2c_smbus_write_i2c_block_data(int file, __u8 command, __u8 length,$/;"	f
+i2c_smbus_write_quick	lib/smbus.c	/^__s32 i2c_smbus_write_quick(int file, __u8 value)$/;"	f
+i2c_smbus_write_word_data	lib/smbus.c	/^__s32 i2c_smbus_write_word_data(int file, __u8 command, __u16 value)$/;"	f
+i2c_write_1b	eeprog/24cXX.c	/^static int i2c_write_1b(struct eeprom *e, __u8 buf)$/;"	f	file:
+i2c_write_2b	eeprog/24cXX.c	/^static int i2c_write_2b(struct eeprom *e, __u8 buf[2])$/;"	f	file:
+i2c_write_3b	eeprog/24cXX.c	/^static int i2c_write_3b(struct eeprom *e, __u8 buf[3])$/;"	f	file:
+incdir	Makefile	/^incdir	= $(PREFIX)\/include$/;"	m
+init	eepromer/eepromer.c	/^int init(char *device,int addr) { $/;"	f
+initialize_kernel_version	out/sbin/i2c-stub-from-dump	/^sub initialize_kernel_version$/;"	s
+initialize_kernel_version	stub/i2c-stub-from-dump	/^sub initialize_kernel_version$/;"	s
+inode_read	eepromer/eepromer.c	/^int inode_read(int file,int dev_addr,void *p_inode ){$/;"	f
+inode_write	eepromer/eepromer.c	/^int  inode_write(int file,int dev_addr,int lenght){$/;"	f
+kernel_version_at_least	out/sbin/i2c-stub-from-dump	/^sub kernel_version_at_least$/;"	s
+kernel_version_at_least	stub/i2c-stub-from-dump	/^sub kernel_version_at_least$/;"	s
+libdir	Makefile	/^libdir	= $(PREFIX)\/lib$/;"	m
+license	py-smbus/setup.py	/^	license="GPLv2",$/;"	v
+line_has_same_values	eeprom/decode-dimms	/^sub line_has_same_values($)$/;"	s
+line_has_same_values	out/bin/decode-dimms	/^sub line_has_same_values($)$/;"	s
+load_kernel_drivers	out/sbin/i2c-stub-from-dump	/^sub load_kernel_drivers$/;"	s
+load_kernel_drivers	stub/i2c-stub-from-dump	/^sub load_kernel_drivers$/;"	s
+lookup_i2c_bus	tools/i2cbusses.c	/^int lookup_i2c_bus(const char *i2cbus_arg)$/;"	f
+lookup_i2c_bus_by_name	tools/i2cbusses.c	/^static int lookup_i2c_bus_by_name(const char *bus_name)$/;"	f	file:
+m_ind	eepromer/eepromer.c	/^	} m_ind,*p_ind;$/;"	v	typeref:struct:mini_inode	file:
+made_address	eepromer/eepromer.c	/^void made_address(int addr,unsigned char *buf){$/;"	f
+main	eeprog/eeprog.c	/^int main(int argc, char** argv)$/;"	f
+main	eepromer/eeprom.c	/^int main(int argc, char **argv){$/;"	f
+main	eepromer/eepromer.c	/^int main(int argc, char *argv[]){$/;"	f
+main	tools/i2cdetect.c	/^int main(int argc, char *argv[])$/;"	f
+main	tools/i2cdump.c	/^int main(int argc, char *argv[])$/;"	f
+main	tools/i2cget.c	/^int main(int argc, char *argv[])$/;"	f
+main	tools/i2cset.c	/^int main(int argc, char *argv[])$/;"	f
+main	tools/i2ctransfer.c	/^int main(int argc, char *argv[])$/;"	f
+maintainer	py-smbus/setup.py	/^	maintainer="Mark M. Hoffman",$/;"	v
+maintainer_email	py-smbus/setup.py	/^	maintainer_email="linux-i2c@vger.kernel.org",$/;"	v
+man3dir	Makefile	/^man3dir	= $(mandir)\/man3$/;"	m
+man8dir	Makefile	/^man8dir	= $(mandir)\/man8$/;"	m
+mandir	Makefile	/^mandir	= $(PREFIX)\/share\/man$/;"	m
+manufacture_date	eeprom/decode-dimms	/^sub manufacture_date($$)$/;"	s
+manufacture_date	out/bin/decode-dimms	/^sub manufacture_date($$)$/;"	s
+manufacturer	eeprom/decode-dimms	/^sub manufacturer(@)$/;"	s
+manufacturer	out/bin/decode-dimms	/^sub manufacturer(@)$/;"	s
+manufacturer_common	eeprom/decode-dimms	/^sub manufacturer_common($$)$/;"	s
+manufacturer_common	out/bin/decode-dimms	/^sub manufacturer_common($$)$/;"	s
+manufacturer_data	eeprom/decode-dimms	/^sub manufacturer_data(@)$/;"	s
+manufacturer_data	out/bin/decode-dimms	/^sub manufacturer_data(@)$/;"	s
+manufacturer_ddr3	eeprom/decode-dimms	/^sub manufacturer_ddr3($$)$/;"	s
+manufacturer_ddr3	out/bin/decode-dimms	/^sub manufacturer_ddr3($$)$/;"	s
+mini_inode	eepromer/eepromer.c	/^static	struct  mini_inode {$/;"	s	file:
+more_adapters	tools/i2cbusses.c	/^static struct i2c_adap *more_adapters(struct i2c_adap *adapters, int n)$/;"	f	file:
+name	tools/i2cbusses.h	/^	char *name;$/;"	m	struct:i2c_adap
+name	tools/i2cdetect.c	/^	const char* name;$/;"	m	struct:func	file:
+nr	tools/i2cbusses.h	/^	int nr;$/;"	m	struct:i2c_adap
+open_i2c_dev	tools/i2cbusses.c	/^int open_i2c_dev(int i2cbus, char *filename, size_t size, int quiet)$/;"	f
+p_ind	eepromer/eepromer.c	/^	} m_ind,*p_ind;$/;"	v	typeref:struct:mini_inode	file:
+parity	eeprom/decode-dimms	/^sub parity($)$/;"	s
+parity	out/bin/decode-dimms	/^sub parity($)$/;"	s
+parse_arg	eeprog/eeprog.c	/^void parse_arg(char *arg, int* paddr, int *psize)$/;"	f
+parse_i2c_address	tools/i2cbusses.c	/^int parse_i2c_address(const char *address_arg, int all_addrs)$/;"	f
+parse_state	tools/i2ctransfer.c	/^enum parse_state {$/;"	g	file:
+part_number	eeprom/decode-dimms	/^sub part_number(@)$/;"	s
+part_number	out/bin/decode-dimms	/^sub part_number(@)$/;"	s
+pec	py-smbus/smbusmodule.c	/^	int pec;	\/* !0 => Packet Error Codes enabled *\/$/;"	m	struct:__anon1	file:
+pheader	eepromer/eepromer.c	/^void pheader(int file,int dev_addr){$/;"	f
+print_edid	eeprom/ddcmon	/^sub print_edid$/;"	s
+print_edid	out/bin/ddcmon	/^sub print_edid$/;"	s
+print_functionality	tools/i2cdetect.c	/^static void print_functionality(unsigned long funcs)$/;"	f	file:
+print_i2c_busses	tools/i2cdetect.c	/^static void print_i2c_busses(void)$/;"	f	file:
+print_info	eeprog/eeprog.c	87;"	d	file:
+print_item	eeprom/decode-vaio	/^sub print_item$/;"	s
+print_item	out/bin/decode-vaio	/^sub print_item$/;"	s
+print_line	eeprom/ddcmon	/^sub print_line$/;"	s
+print_line	out/bin/ddcmon	/^sub print_line$/;"	s
+print_msgs	tools/i2ctransfer.c	/^static void print_msgs(struct i2c_msg *msgs, __u32 nmsgs, unsigned flags)$/;"	f	file:
+print_timings	eeprom/ddcmon	/^sub print_timings$/;"	s
+print_timings	out/bin/ddcmon	/^sub print_timings$/;"	s
+printc	eeprom/decode-dimms	/^sub printc($) # print comment$/;"	s
+printc	out/bin/decode-dimms	/^sub printc($) # print comment$/;"	s
+printh	eeprom/decode-dimms	/^sub printh($$) # print header w\/ given text$/;"	s
+printh	out/bin/decode-dimms	/^sub printh($$) # print header w\/ given text$/;"	s
+printl	eeprom/decode-dimms	/^sub printl($$) # print a line w\/ label and value$/;"	s
+printl	out/bin/decode-dimms	/^sub printl($$) # print a line w\/ label and value$/;"	s
+printl2	eeprom/decode-dimms	/^sub printl2 # print a line w\/ label and value (outside a table)$/;"	s
+printl2	out/bin/decode-dimms	/^sub printl2 # print a line w\/ label and value (outside a table)$/;"	s
+printl_cond	eeprom/decode-dimms	/^sub printl_cond($$$) # same as printl but conditional$/;"	s
+printl_cond	out/bin/decode-dimms	/^sub printl_cond($$$) # same as printl but conditional$/;"	s
+printl_mfg_assembly_serial	eeprom/decode-dimms	/^sub printl_mfg_assembly_serial(@)$/;"	s
+printl_mfg_assembly_serial	out/bin/decode-dimms	/^sub printl_mfg_assembly_serial(@)$/;"	s
+printl_mfg_location_code	eeprom/decode-dimms	/^sub printl_mfg_location_code($)$/;"	s
+printl_mfg_location_code	out/bin/decode-dimms	/^sub printl_mfg_location_code($)$/;"	s
+prints	eeprom/decode-dimms	/^sub prints($) # print separator w\/ given text$/;"	s
+prints	out/bin/decode-dimms	/^sub prints($) # print separator w\/ given text$/;"	s
+process_dump	out/sbin/i2c-stub-from-dump	/^sub process_dump$/;"	s
+process_dump	stub/i2c-stub-from-dump	/^sub process_dump$/;"	s
+rawread	eeprom/ddcmon	/^sub rawread$/;"	s
+rawread	eeprom/decode-edid	/^sub rawread$/;"	s
+rawread	out/bin/ddcmon	/^sub rawread$/;"	s
+rawread	out/bin/decode-edid	/^sub rawread$/;"	s
+read_eeprom_bytes	eeprom/decode-vaio	/^sub read_eeprom_bytes$/;"	s
+read_eeprom_bytes	out/bin/decode-vaio	/^sub read_eeprom_bytes$/;"	s
+read_from_eeprom	eeprog/eeprog.c	/^int read_from_eeprom(struct eeprom *e, int addr, int size, int hex)$/;"	f
+read_hexdump	eeprom/decode-dimms	/^sub read_hexdump($)$/;"	s
+read_hexdump	out/bin/decode-dimms	/^sub read_hexdump($)$/;"	s
+readspd	eeprom/decode-dimms	/^sub readspd($$$)$/;"	s
+readspd	out/bin/decode-dimms	/^sub readspd($$$)$/;"	s
+real_printl	eeprom/decode-dimms	/^sub real_printl($$) # print a line w\/ label and values$/;"	s
+real_printl	out/bin/decode-dimms	/^sub real_printl($$) # print a line w\/ label and values$/;"	s
+real_prints	eeprom/decode-dimms	/^sub real_prints($) # print separator w\/ given text$/;"	s
+real_prints	out/bin/decode-dimms	/^sub real_prints($) # print separator w\/ given text$/;"	s
+rtrim	tools/i2cbusses.c	/^static int rtrim(char *s)$/;"	f	file:
+same_values	eeprom/decode-dimms	/^sub same_values(@)$/;"	s
+same_values	out/bin/decode-dimms	/^sub same_values(@)$/;"	s
+sbindir	Makefile	/^sbindir	= $(PREFIX)\/sbin$/;"	m
+scan_i2c_bus	tools/i2cdetect.c	/^static int scan_i2c_bus(int file, int mode, unsigned long funcs,$/;"	f	file:
+sdram_module_configuration_type	eeprom/decode-dimms	/^sub sdram_module_configuration_type($)$/;"	s
+sdram_module_configuration_type	out/bin/decode-dimms	/^sub sdram_module_configuration_type($)$/;"	s
+sdram_voltage_interface_level	eeprom/decode-dimms	/^sub sdram_voltage_interface_level($)$/;"	s
+sdram_voltage_interface_level	out/bin/decode-dimms	/^sub sdram_voltage_interface_level($)$/;"	s
+set_slave_addr	tools/i2cbusses.c	/^int set_slave_addr(int file, int address, int force)$/;"	f
+sort_timings	eeprom/ddcmon	/^sub sort_timings$/;"	s
+sort_timings	out/bin/ddcmon	/^sub sort_timings$/;"	s
+spd_sizes	eeprom/decode-dimms	/^sub spd_sizes($)$/;"	s
+spd_sizes	out/bin/decode-dimms	/^sub spd_sizes($)$/;"	s
+spd_written	eeprom/decode-dimms	/^sub spd_written(@)$/;"	s
+spd_written	out/bin/decode-dimms	/^sub spd_written(@)$/;"	s
+stav	eepromer/eepromer.c	/^static int stav=0;$/;"	v	file:
+sysfs_device_attribute	eeprom/decode-dimms	/^sub sysfs_device_attribute$/;"	s
+sysfs_device_attribute	eeprom/decode-vaio	/^sub sysfs_device_attribute$/;"	s
+sysfs_device_attribute	out/bin/decode-dimms	/^sub sysfs_device_attribute$/;"	s
+sysfs_device_attribute	out/bin/decode-vaio	/^sub sysfs_device_attribute$/;"	s
+sysfs_device_driver	eeprom/decode-vaio	/^sub sysfs_device_driver$/;"	s
+sysfs_device_driver	out/bin/decode-vaio	/^sub sysfs_device_driver$/;"	s
+timestamp	eepromer/eepromer.c	/^			time_t  timestamp;$/;"	m	struct:mini_inode	file:
+tns	eeprom/decode-dimms	/^sub tns($) # print a time in ns, with 2 decimal digits$/;"	s
+tns	out/bin/decode-dimms	/^sub tns($) # print a time in ns, with 2 decimal digits$/;"	s
+tns1	eeprom/decode-dimms	/^sub tns1($) # print a time in ns, with 1 decimal digit$/;"	s
+tns1	out/bin/decode-dimms	/^sub tns1($) # print a time in ns, with 1 decimal digit$/;"	s
+tns3	eeprom/decode-dimms	/^sub tns3($) # print a time in ns, with 3 decimal digits$/;"	s
+tns3	out/bin/decode-dimms	/^sub tns3($) # print a time in ns, with 3 decimal digits$/;"	s
+type	eeprog/24cXX.h	/^	int type; 	\/\/ eeprom type$/;"	m	struct:eeprom
+url	py-smbus/setup.py	/^	url="https:\/\/i2c.wiki.kernel.org\/index.php\/I2C_Tools",$/;"	v
+usage_if	eeprog/eeprog.c	32;"	d	file:
+user_ack	tools/util.c	/^int user_ack(int def)$/;"	f
+vaio_decode	eeprom/decode-vaio	/^sub vaio_decode$/;"	s
+vaio_decode	out/bin/decode-vaio	/^sub vaio_decode$/;"	s
+value	tools/i2cdetect.c	/^	long value;$/;"	m	struct:func	file:
+value_or_undefined	eeprom/decode-dimms	/^sub value_or_undefined$/;"	s
+value_or_undefined	out/bin/decode-dimms	/^sub value_or_undefined$/;"	s
+verify_checksum	eeprom/ddcmon	/^sub verify_checksum$/;"	s
+verify_checksum	out/bin/ddcmon	/^sub verify_checksum$/;"	s
+version	py-smbus/setup.py	/^	version="1.1",$/;"	v
+warn	eepromer/eepromer.c	/^void warn(void)$/;"	f
+write_to_eeprom	eeprog/eeprog.c	/^int write_to_eeprom(struct eeprom *e, int addr)$/;"	f

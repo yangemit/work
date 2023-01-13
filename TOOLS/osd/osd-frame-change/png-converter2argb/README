@@ -1,0 +1,8 @@
+说明：
+
+test.sh:编译converterPNG2ARGB.c 文件---> 文件作用是将png-->argb
+本目录下converterPNG2ARGB 应用程序
+ARGB 是生成的argb 格式的文件
+我们只需要添加png文件到该目录下
+
+gcc converterPNG2ARGB.c -o converterPNG2ARGB /usr/lib/x86_64-linux-gnu/libpng16.so.16.34.0

@@ -1,0 +1,3 @@
+生成adbd：
+make clean
+make -f Makefile.client
