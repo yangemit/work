@@ -20,7 +20,17 @@
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
 
+#include <semaphore.h>
+
 #define TAG_KEY "KEY_GPIO"
+
+/* 黑图显示osd 图片标志 */
+volatile int flag_osd_black = 0;
+
+/* 信号对象 */
+sem_t sem_osd;
+sem_t sem_led;
+
 /*
 	算法模式
 	1：单人模式
@@ -88,7 +98,7 @@ int first_set_flag = 0;
 	0：关
 	1：显示
 */
-int osd_switsh = 0;
+volatile int osd_switsh = 0;
 
 /*
 	zoom 与 pantilt 数据交互结构体
@@ -106,7 +116,7 @@ crop_obj_t zoom_crop;
 	集合变量
 */
 typedef struct _key_info {
-	int frame_on_off ;
+	volatile int frame_on_off ;
 	int audio_on_off ;
 
 	/* 亮度 */
@@ -122,7 +132,7 @@ typedef struct _key_info {
 	/* pantilt 使能b标志*/
 	int pantilt_flag;
 	/* osd图片标号 */
-	int png_num;
+	volatile int png_num;
 } key_info;
 /*
 	zoom 与 pt 改变的左上角坐标
@@ -451,7 +461,7 @@ char *set_ARGB_buff(char const *file,int x,int y)
 	num 表示是哪一个区
 	png_frame_num:第几个要显示的png图像
 */
-static void set_osd_show(int *osd_on_off,int num,int png_frame_num)
+static void set_osd_show(volatile int *osd_on_off,int num,volatile int png_frame_num)
 {
 	int on_off = *osd_on_off;
 	if(get_frame_fmt() != 1){
@@ -584,14 +594,12 @@ static void audio_switch(key_info *flag)
 		flag->audio_on_off = ENABLE;
 		set_audio_switch(ENABLE);
 		osd_switsh = 1;
-		set_osd_show(&osd_switsh,1,3);
 		flag->png_num = 3;
 		//printf("INFO(%s)[%d] on audio success!\n",TAG_KEY,__LINE__);
 	} else {
 		flag->audio_on_off = DISABLE;
 		set_audio_switch(DISABLE);
 		osd_switsh = 1;
-		set_osd_show(&osd_switsh,1,4);
 		flag->png_num = 4;
 		//printf("INFO(%s)[%d] on audio success!\n",TAG_KEY,__LINE__);
 	}
@@ -729,7 +737,6 @@ static void key_mode_process(int key ,key_info *pantiltzoom_flag)
 				set_face_zoom_mode(1); //模式1
 				set_face_zoom_switch(ENABLE);//算法开
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh, 1, 9);
 				pantiltzoom_flag->png_num = 9;
 				break;
 			case KEY_MODE_MANY:
@@ -737,7 +744,6 @@ static void key_mode_process(int key ,key_info *pantiltzoom_flag)
 				printf("INFO(%s)%s: many success !\n",TAG_KEY,__func__);
 				set_face_zoom_mode(2);//模式2
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh, 1, 10);
 				pantiltzoom_flag->png_num = 10;
 				break;
 			case KEY_MODE_NORMAL:
@@ -745,7 +751,6 @@ static void key_mode_process(int key ,key_info *pantiltzoom_flag)
 				printf("INFO(%s)%s: normal success !\n",TAG_KEY,__func__);
 				set_face_zoom_switch(DISABLE);//关闭算法
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh, 1, 11);
 				pantiltzoom_flag->png_num = 11;
 				/*
 					清空pantiltzoom 数据
@@ -778,16 +783,16 @@ static void frame_switch(key_info *flag)
 		flag->frame_on_off = ENABLE;
 		set_stream_switch(ENABLE);
 		osd_switsh = 1;
-		set_osd_show(&osd_switsh,1,1);
 		module_key_ctl_write(GPIO_PB17,DISABLE);
 		flag->png_num = 1;
+		sem_post(&sem_osd);
 		//printf("INFO(%s)[%d] on frame success!\n",TAG_KEY,__LINE__);
 	} else {
 		//关图像
-		flag->frame_on_off = DISABLE;
 		set_stream_switch(DISABLE);
 		osd_switsh = 1;
-		set_osd_show(&osd_switsh,1,2);
+		flag->png_num = 2;
+		sem_post(&sem_osd);
 
 		/* 亮度 */
 		flag->bright_value = 128;
@@ -820,7 +825,6 @@ static void frame_switch(key_info *flag)
 			关闭蓝灯 开红灯
 		*/
 		module_key_ctl_write(GPIO_PB17,ENABLE);
-		flag->png_num = 2;
 		//printf("INFO(%s)[%d] off frame success!\n",TAG_KEY,__LINE__);
 	}
 
@@ -891,20 +895,21 @@ pan_set:   左( 3600 ~ 36000 ) 右( -3600 ~ -36000 )移动
 
 
 
+key_info key_info_source;
+/*
+   i2c 通信资源
+   将要读取的buff数据
+*/
+volatile unsigned char rd_buf[2]={0x00};
+
 static void  *gpio_ir_thread(void *arg)
 {
 	int fp;
 	int ret;
-	/*
-	   i2c 通信资源
-	   将要读取的buff数据
-	   */
-	unsigned char rd_buf[2]={0x00};
 
 	/*
 	   初始化资源
-	   */
-	key_info key_info_source;
+	*/
 	key_info_source.frame_on_off = ENABLE;
 	key_info_source.audio_on_off = ENABLE;
 
@@ -941,12 +946,8 @@ static void  *gpio_ir_thread(void *arg)
 	/*
 	    连续按键测试时间
 	*/
-	struct timeval time_2;
-	long int t3 = 0, t4 = 0;
-	/*
-	    长按标志，flag_time = 1 表示长按
-	*/
-	int flag_time = 0;
+	/*struct timeval time_2;*/
+	/*long int t3 = 0, t4 = 0;*/
 
 	/*
 	   出图 蓝灯亮 控制标志
@@ -977,268 +978,197 @@ static void  *gpio_ir_thread(void *arg)
 
 	printf("[INFO] open i2c-1 success !!!\n");
 
-
 	while (1) {
 
 		ret = read(fp, &rd_buf, 2);
 		if ( ret < 0 ) {
 			printf("[INFO] read i2c-1 data failed !!!\n");
-			usleep(100 * 1000);
+			usleep( 200 * 1000 );
 			continue;
 		}
 
-		/*
-			长按处理标志：flag_time = 3时，进行长按处理
-		*/
-		if ( 0x55 != rd_buf[0] ) {
-			gettimeofday(&time_2, NULL);
-			t3 = time.tv_sec * 1000 + time.tv_usec / 1000;
-			/*
-				两次按键的时间差
-			*/
-			//printf("[INFO] time %ld \n ",t3-t4);
-			if ( t3 - t4 <= 270 ) {
-				flag_time++;
-				//printf("[INFO] flag_time %d \n",flag_time);
-			}
-
-		}
+		/*if ( 0x55 == rd_buf[0] ) {*/
+			/*usleep( 200 * 1000 );*/
+			/*continue;*/
+		/*}*/
 
 		if ( get_frame_switch() ) {
 			if ( 16 == rd_buf[0] ) { //KEY_1
 				//printf("[INFO] frame on_off\n");
 				frame_switch(&key_info_source);
-
+				sem_post(&sem_led);
 			} else if ( 10 == rd_buf[0] ) { //KEY_2
 				audio_switch(&key_info_source);
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
 				//printf("[INFO] audio on_off\n");
-			} else if ( 2 == rd_buf[0] ) { //KEY_4
+			} else if ( 2 == rd_buf[0]  ) { //KEY_4
 				//上
 				//printf("[INFO] frame off move\n");
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-				if( flag_time == 1 ) {
-					while(1) {
-						key_info_source.tilt_value += 3600;
-						if ( (key_info_source.tilt_value / 3600 ) <= 10 ) {
-							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-						} else {
-							key_info_source.tilt_value = 36000;
-							flag_time = 0;
-							break;
-						}
-						usleep( 30 * 1000 );
-					}
+
+				key_info_source.tilt_value += 1800;
+				if ( (key_info_source.tilt_value / 1800 ) <= 20 ) {
+					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
 				} else {
-					key_info_source.tilt_value += 3600;
-					if ( (key_info_source.tilt_value / 3600 ) <= 10 ) {
-						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-					} else {
-						key_info_source.tilt_value = 36000;
-					}
+					key_info_source.tilt_value = 36000;
 				}
+
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,5);
 				key_info_source.png_num = 5;
-			} else if ( 4 == rd_buf[0] ) { //KEY_3
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 4 == rd_buf[0]  ) { //KEY_3
 				//下
 				//printf("[INFO] frame on move\n");
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-				if ( flag_time == 1 ) {
-					while(1) {
-						key_info_source.tilt_value -= 3600;
-						if ( (key_info_source.tilt_value / 3600 ) >= -10 ) {
-							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-						} else {
-							key_info_source.tilt_value = -36000;
-							flag_time = 0;
-							break;
-						}
-						usleep( 30 * 1000 );
-					}
+
+				key_info_source.tilt_value -= 1800;
+				if ( (key_info_source.tilt_value / 1800 ) >= -20 ) {
+					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
 				} else {
-					key_info_source.tilt_value -= 3600;
-					if ( (key_info_source.tilt_value / 3600 ) >= -10 ) {
-						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-					} else {
-						key_info_source.tilt_value = -36000;
-					}
+					key_info_source.tilt_value = -36000;
 				}
+
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,6);
 				key_info_source.png_num = 6;
-			} else if ( 5 == rd_buf[0] ) { //KEY_5
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 5 == rd_buf[0]  ) { //KEY_5
 				//左
 				//printf("[INFO] frame left move\n");
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-				if ( flag_time == 1 ) {
-					while(1) {
-						key_info_source.pan_value += 3600;
-						if ( (key_info_source.pan_value / 3600 ) <= 10 ) {
-							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-						} else {
-							key_info_source.pan_value = 36000;
-							flag_time = 0;
-							break;
-						}
-						usleep( 30 * 1000 );
-					}
+
+				key_info_source.pan_value += 1800;
+				if ( (key_info_source.pan_value / 1800 ) <= 20 ) {
+					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
 				} else {
-					key_info_source.pan_value += 3600;
-					if ( (key_info_source.pan_value / 3600 ) <= 10 ) {
-						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-					} else {
-						key_info_source.pan_value = 36000;
-					}
+					key_info_source.pan_value = 36000;
 				}
+
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,8);
 				key_info_source.png_num = 8;
-			} else if ( 3 == rd_buf[0] ) { //KEY_6
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 3 == rd_buf[0]  ) { //KEY_6
 				//右
 				//printf("[INFO] frame right move\n");
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
 					continue;
-				if ( flag_time == 1 ) {
-					while(1) {
-						key_info_source.pan_value -= 3600;
-						if ( (key_info_source.pan_value / 3600 ) >= -10 ) {
-							set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-						} else {
-							key_info_source.pan_value = -36000;
-							flag_time = 0;
-							break;
-						}
-						usleep( 30 * 1000 );
-					}
+
+				key_info_source.pan_value -= 1800;
+				if ( (key_info_source.pan_value / 1800 ) >= -20 ) {
+					set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
 				} else {
-					key_info_source.pan_value -= 3600;
-					if ( (key_info_source.pan_value / 3600 ) >= -10 ) {
-						set_pantilt(&key_info_source.pan_value,&key_info_source.tilt_value);
-					} else {
-						key_info_source.pan_value = -36000;
-					}
+					key_info_source.pan_value = -36000;
 				}
+
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,7);
 				key_info_source.png_num = 7;
-			} else if ( 7 == rd_buf[0] ) { //KEY_7
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 7 == rd_buf[0]  ) { //KEY_7
 				++key_type;
 				//printf("[INFO] frame mode0\n");
 				if ( key_type == KEY_MODE_NUM ) {
 					key_type = KEY_MODE_SINGLE;
 				}
+
 				key_mode_process(key_type,&key_info_source);
-			} else if ( 9 == rd_buf[0] ) { //KEY_8
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 9 == rd_buf[0]  ) { //KEY_8
 				//放大
 				if ( key_type != KEY_MODE_NORMAL)
 					continue;
 				//printf("[INFO] be big\n");
-				if ( flag_time == 1 ) {
-					while(1) {
-						key_info_source.zoom_value += 5;
-						//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
-						if ( key_info_source.zoom_value <= 200 ) {
-							set_zoom(&key_info_source.zoom_value);
-						} else {
-							key_info_source.zoom_value = 200;
-							flag_time = 0;
-							break;
-						}
-						usleep( 30 * 1000 );
-					}
+
+				key_info_source.zoom_value += 2;
+				//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
+				if ( key_info_source.zoom_value <= 200 ) {
+					set_zoom(&key_info_source.zoom_value);
 				} else {
-					key_info_source.zoom_value += 5;
-					//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
-					if ( key_info_source.zoom_value <= 200 ) {
-						set_zoom(&key_info_source.zoom_value);
-					} else {
-						key_info_source.zoom_value = 200;
-					}
+					key_info_source.zoom_value = 200;
 				}
+
 				osd_switsh = 1;
 				key_info_source.pantilt_flag = 1;
-				set_osd_show(&osd_switsh,1,13);
 				key_info_source.png_num = 13;
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
 			} else if ( 8 == rd_buf[0]  ) { //KEY_9
 				//缩小
 				if ( key_type != KEY_MODE_NORMAL)
 					continue;
 				//printf("[INFO] no be big\n");
-				if ( flag_time == 1 ) {
-					while(1) {
-						key_info_source.zoom_value -= 5;
-						//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
-						if(key_info_source.zoom_value >= 100) {
-							set_zoom(&key_info_source.zoom_value);
-						} else {
-							key_info_source.zoom_value = 100;
-							flag_time = 0;
-							break;
-						}
-						usleep( 30 * 1000 );
-					}
+
+				key_info_source.zoom_value -= 2;
+				//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
+				if(key_info_source.zoom_value >= 100) {
+					set_zoom(&key_info_source.zoom_value);
 				} else {
-					key_info_source.zoom_value -= 5;
-					//printf("[INFO] zoom_value %d \n",key_info_source.zoom_value);
-					if(key_info_source.zoom_value >= 100) {
-						set_zoom(&key_info_source.zoom_value);
-					} else {
-						key_info_source.zoom_value = 100;
-					}
+					key_info_source.zoom_value = 100;
 				}
+
 				osd_switsh = 1;
 				key_info_source.pantilt_flag = 1;
-				set_osd_show(&osd_switsh,1,12);
 				key_info_source.png_num = 12;
-
-			} else if ( 11 == rd_buf[0] ) { //KEY_F1
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 11 == rd_buf[0]  ) { //KEY_F1
 				//亮度减
 				//printf("[INFO] -- bright\n");
 				set_brightness_sharpness(DISABLE,&key_info_source.bright_value,ENABLE);
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,14);
 				key_info_source.png_num = 14;
-			} else if ( 12 == rd_buf[0] ) { //KEY_F2
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 12 == rd_buf[0]  ) { //KEY_F2
 				//亮度加
 				set_brightness_sharpness(ENABLE,&key_info_source.bright_value,ENABLE);
 				//printf("[INFO] ++ bright\n");
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,15);
 				key_info_source.png_num = 15;
-			} else if ( 0 == rd_buf[0] ) { //KEY_F3
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 0 == rd_buf[0]  ) { //KEY_F3
 				//锐度减
 				//printf("[INFO] -- sharpness\n");
 				set_brightness_sharpness(DISABLE,&key_info_source.sharp_value,DISABLE);
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,16);
 				key_info_source.png_num = 16;
-			} else if ( 6 == rd_buf[0] ) { //KEY_F4
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
+			} else if ( 6 == rd_buf[0]  ) { //KEY_F4
 				//锐度加
 				//printf("[INFO] ++ sharpness\n");
 				set_brightness_sharpness(ENABLE,&key_info_source.sharp_value,DISABLE);
 				osd_switsh = 1;
-				set_osd_show(&osd_switsh,1,17);
 				key_info_source.png_num = 17;
+				sem_post(&sem_osd);
+				sem_post(&sem_led);
 			}
 		}
 
 		/*
-			其他按键触发长按标志，将其 flag_time 重置 0
+			测试连续按键所要的时间
 		*/
-
-		if ( flag_time > 1 ) flag_time = 0;
-		t4 = t3;
+		/*gettimeofday(&time_2, NULL);*/
+		/*t3 = time_2.tv_sec * 1000 + time_2.tv_usec / 1000;*/
+		/*printf("[INFO] time %ld \n ",t3-t4);*/
+		/*t4 = t3;*/
+		/*printf("[INFO] %d \n ",rd_buf[0]);*/
 
 		/*
 		   出图 蓝灯亮
@@ -1254,43 +1184,40 @@ static void  *gpio_ir_thread(void *arg)
 		   osd_time 控制显示时间
 		   osd_time/1000 = 2S
 		*/
-		if ( (rd_buf[0] != 0x55 || flag_osd)  && get_frame_switch() ) {
+		if ( ( rd_buf[0] != 0x55 || flag_osd )  && get_frame_switch() ) {
 			if( osd_switsh == 1 ) {
-					gettimeofday(&time, NULL);
-					t1 = time.tv_sec * 1000 + time.tv_usec / 1000;
-					if((t1 - t2) > osd_time && flag_osd ) {
-						osd_switsh = 0;
-						set_osd_show(&osd_switsh,1,-1);
-						flag_osd = 0;
-					} else {
-						if ( !flag_osd ) {
-							t2 = time.tv_sec * 1000 + time.tv_usec / 1000;
-							flag_osd = 1;
-						}
-
+				gettimeofday(&time, NULL);
+				t1 = time.tv_sec * 1000 + time.tv_usec / 1000;
+				/* 后期时间上的优化 dbug */
+				/*printf("[INFO] t1 : %ld\n",t1);*/
+				/*printf("[INFO] t2 : %ld\n",t2);*/
+				/*printf("[INFO] t1 - t2 : %ld\n",t1 - t2);*/
+				if((t1 - t2) > osd_time && flag_osd ) {
+					if ( key_info_source.png_num == 2 ) {
+						key_info_source.frame_on_off = 0;
+						flag_osd_black = 1;
 					}
-					if ( (t1 - t2) < (osd_time - 800) && rd_buf[0] != 0x55 )
-						t2 = time.tv_sec * 1000 + time.tv_usec / 1000;
-				/*
-				   led 闪烁
-				   */
-				if ( !key_info_source.frame_on_off ) {
-					module_key_ctl_write(GPIO_PB27,ENABLE);
-					usleep(15 * 1000);
-					module_key_ctl_write(GPIO_PB27,DISABLE);
-					usleep(15 * 1000);
-					module_key_ctl_write(GPIO_PB27,ENABLE);
+					osd_switsh = 0;
+					//printf("[INFO] ----t1 - t2---- : %ld\n",t1 - t2);
+					key_info_source.png_num = -1;
+					flag_osd = 0;
+					/* 进入osd 显示函数 */
+					rd_buf[0] = 0x99;
+					sem_post(&sem_osd);
 				} else {
-					module_key_ctl_write(GPIO_PB27,DISABLE);
-					usleep(15 * 1000);
+					if ( !flag_osd ) {
+						t2 = time.tv_sec * 1000 + time.tv_usec / 1000;
+						flag_osd = 1;
+					}
+
+				}
+				if ( (t1 - t2) < (osd_time - 800) && rd_buf[0] != 0x55 ) {
+					t1 = time.tv_sec * 1000 + time.tv_usec / 1000;
+					t2 = time.tv_sec * 1000 + time.tv_usec / 1000;
 				}
 
-			} else {
-				usleep(10 * 1000);
 			}
 
-		} else {
-			usleep(10 * 1000);
 		}
 
 		/*
@@ -1320,6 +1247,7 @@ static void  *gpio_ir_thread(void *arg)
 			flag_osd = 0;
 			flag_led = 0;
 			osd_switsh = 0;
+			key_info_source.png_num = -1;
 			key_info_source.pantilt_flag = 0;
 			memset(&zoom_crop, 0, sizeof(zoom_crop));
 
@@ -1327,16 +1255,72 @@ static void  *gpio_ir_thread(void *arg)
 			module_key_ctl_write(GPIO_PB27,DISABLE);
 		}
 
+		usleep( 50 * 1000 );
+
 	}
 
 	close(fp);
 	return NULL;
 }
 
+static void  *gpio_osd_thread(void *arg)
+{
+	while(1) {
+		sem_wait(&sem_osd);
+		if ( get_frame_switch() && rd_buf[0] != 0x55 ) {
+			//osd 图像显示
+			/* 控制显示black 图时，协调osd 显示时间和再次进入black图 */
+			if( !key_info_source.frame_on_off ) {
+				if ( key_info_source.png_num == 2 ) key_info_source.frame_on_off = 1;
+				if ( flag_osd_black == 1 ) {
+					key_info_source.frame_on_off = 1;
+					flag_osd_black = 0;
+				}
+				set_osd_show(&osd_switsh,1,key_info_source.png_num);
+			}
+		}
+	}
+	return NULL;
+}
+
+static void  *gpio_led_thread(void *arg)
+{
+	while(1) {
+		sem_wait(&sem_led);
+		if( get_frame_switch() && rd_buf[0] != 0x55 ) {
+			//LED 闪烁
+			if( !key_info_source.frame_on_off ) {
+				module_key_ctl_write(GPIO_PB27,ENABLE);
+				usleep( 60 * 1000 );
+				module_key_ctl_write(GPIO_PB27,DISABLE);
+				usleep( 60 * 1000 );
+				module_key_ctl_write(GPIO_PB27,ENABLE);
+			} else {
+				module_key_ctl_write(GPIO_PB27,DISABLE);
+			}
+
+		}
+	}
+
+	return NULL;
+}
 
 int module_key_process(void)
 {
 	int ret = 0;
+
+	/* 初始化信号 */
+	ret = sem_init(&sem_osd, 0, 0);
+	if (ret == -1) {
+		printf("sem_init_osd failed \n");
+		return -1;
+	}
+
+	ret = sem_init(&sem_led, 0, 0);
+	if (ret == -1) {
+		printf("sem_init_led failed \n");
+		return -1;
+	}
 
 	static pthread_t gpio_ir_pid;
 	pthread_attr_t gpio_ir_attr;
@@ -1345,7 +1329,29 @@ int module_key_process(void)
 	pthread_attr_setschedpolicy(&gpio_ir_attr, SCHED_OTHER);
 	ret = pthread_create(&gpio_ir_pid, &gpio_ir_attr, &gpio_ir_thread, NULL);
 	if (ret) {
-		printf("ERROR(%s): create thread for key_monitor_thread failed!\n", TAG_KEY);
+		printf("ERROR(%s): create thread for gpio_ir_thread failed!\n", TAG_KEY);
+		return -1;
+	}
+
+	static pthread_t gpio_led_pid;
+	pthread_attr_t gpio_led_attr;
+	pthread_attr_init(&gpio_led_attr);
+	pthread_attr_setdetachstate(&gpio_led_attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_setschedpolicy(&gpio_led_attr, SCHED_OTHER);
+	ret = pthread_create(&gpio_led_pid, &gpio_led_attr, &gpio_led_thread, NULL);
+	if (ret) {
+		printf("ERROR(%s): create thread for gpio_led_thread failed!\n", TAG_KEY);
+		return -1;
+	}
+
+	static pthread_t gpio_osd_pid;
+	pthread_attr_t gpio_osd_attr;
+	pthread_attr_init(&gpio_osd_attr);
+	pthread_attr_setdetachstate(&gpio_osd_attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_setschedpolicy(&gpio_osd_attr, SCHED_OTHER);
+	ret = pthread_create(&gpio_osd_pid, &gpio_osd_attr, &gpio_osd_thread, NULL);
+	if (ret) {
+		printf("ERROR(%s): create thread for gpio_osd_thread failed!\n", TAG_KEY);
 		return -1;
 	}
 

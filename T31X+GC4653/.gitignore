@@ -13,8 +13,8 @@ out_temp
 tags
 ucamera-t31
 *.ko
-*.a
-*.so
+#*.a
+#*.so
 
 hid_update
 
