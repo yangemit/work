@@ -33,7 +33,7 @@ extern int g_Power_save;
 #define UVC_VIDEO_CH			0
 #define ALGORITHM_VIDEO_CH		1
 
-#define OSD_HANDLE_NUM    2 
+#define OSD_HANDLE_NUM    3
 
 #define SENSOR_FRAME_RATE_NUM_25	25
 #define SENSOR_FRAME_RATE_NUM_30	30

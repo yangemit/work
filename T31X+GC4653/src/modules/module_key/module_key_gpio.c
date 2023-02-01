@@ -24,12 +24,20 @@
 
 #define TAG_KEY "KEY_GPIO"
 
+/* 静态初始化创建互斥锁 */
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
+/* 图标长显标志 */
+volatile int osd_long_flag = 0;
+volatile int osd_type = 0;
+
 /* 黑图显示osd 图片标志 */
 volatile int flag_osd_black = 0;
 
 /* 信号对象 */
 sem_t sem_osd;
 sem_t sem_led;
+sem_t sem_osd_long;
 
 /*
 	算法模式
@@ -99,6 +107,7 @@ int first_set_flag = 0;
 	1：显示
 */
 volatile int osd_switsh = 0;
+volatile int osd_long_switsh = 0;
 
 /*
 	zoom 与 pantilt 数据交互结构体
@@ -537,6 +546,27 @@ static void set_osd_show(volatile int *osd_on_off,int num,volatile int png_frame
 				/*printf("[INFO] p0x=%d p0y=%d p1x=%d p1y=%d \n",*/
 				/*rAttrRect_type_2.rect.p0.x,rAttrRect_type_2.rect.p0.y,*/
 				/*rAttrRect_type_2.rect.p1.x,rAttrRect_type_2.rect.p1.y);*/
+			} else if ( png_frame_num == 9 ) {
+				rAttrRect_type_2.rect.p0.x = 0;
+				rAttrRect_type_2.rect.p0.y = 0;
+				rAttrRect_type_2.rect.p1.x = rAttrRect_type_2.rect.p0.x+x_out-1;
+				rAttrRect_type_2.rect.p1.y = rAttrRect_type_2.rect.p0.y+y_out-1;
+				rAttrRect_type_2.fmt = PIX_FMT_ARGB;
+				rAttrRect_type_2.data.picData.pData = buff_ARGB;
+			} else if ( png_frame_num == 10 ) {
+				rAttrRect_type_2.rect.p0.x = 0;
+				rAttrRect_type_2.rect.p0.y = 0;
+				rAttrRect_type_2.rect.p1.x = rAttrRect_type_2.rect.p0.x+x_out-1;
+				rAttrRect_type_2.rect.p1.y = rAttrRect_type_2.rect.p0.y+y_out-1;
+				rAttrRect_type_2.fmt = PIX_FMT_ARGB;
+				rAttrRect_type_2.data.picData.pData = buff_ARGB;
+			} else if ( png_frame_num == 11 ) {
+				rAttrRect_type_2.rect.p0.x = 0;
+				rAttrRect_type_2.rect.p0.y = 0;
+				rAttrRect_type_2.rect.p1.x = rAttrRect_type_2.rect.p0.x+x_out-1;
+				rAttrRect_type_2.rect.p1.y = rAttrRect_type_2.rect.p0.y+y_out-1;
+				rAttrRect_type_2.fmt = PIX_FMT_ARGB;
+				rAttrRect_type_2.data.picData.pData = buff_ARGB;
 			} else {
 				rAttrRect_type_2.rect.p0.x = get_osd_width()-x_out;
 				rAttrRect_type_2.rect.p0.y = 0;
@@ -736,22 +766,22 @@ static void key_mode_process(int key ,key_info *pantiltzoom_flag)
 				printf("INFO(%s)%s: single success !\n",TAG_KEY,__func__);
 				set_face_zoom_mode(1); //模式1
 				set_face_zoom_switch(ENABLE);//算法开
-				osd_switsh = 1;
-				pantiltzoom_flag->png_num = 9;
+				osd_long_switsh = 1;
+				osd_long_flag = 9;
 				break;
 			case KEY_MODE_MANY:
 				/*printf("[%s]mode_success :%d \n",__func__,key_type);*/
 				printf("INFO(%s)%s: many success !\n",TAG_KEY,__func__);
 				set_face_zoom_mode(2);//模式2
-				osd_switsh = 1;
-				pantiltzoom_flag->png_num = 10;
+				osd_long_switsh = 1;
+				osd_long_flag = 10;
 				break;
 			case KEY_MODE_NORMAL:
 				/*printf("[%s]mode_success :%d \n",__func__,key_type);*/
 				printf("INFO(%s)%s: normal success !\n",TAG_KEY,__func__);
 				set_face_zoom_switch(DISABLE);//关闭算法
-				osd_switsh = 1;
-				pantiltzoom_flag->png_num = 11;
+				osd_long_switsh = 1;
+				osd_long_flag = 11;
 				/*
 					清空pantiltzoom 数据
 				*/
@@ -786,6 +816,10 @@ static void frame_switch(key_info *flag)
 		module_key_ctl_write(GPIO_PB17,DISABLE);
 		flag->png_num = 1;
 		sem_post(&sem_osd);
+		/* 开长显图标 */
+		osd_long_switsh = 1;
+		osd_long_flag = osd_type;
+		sem_post(&sem_osd_long);
 		//printf("INFO(%s)[%d] on frame success!\n",TAG_KEY,__LINE__);
 	} else {
 		//关图像
@@ -826,6 +860,12 @@ static void frame_switch(key_info *flag)
 		*/
 		module_key_ctl_write(GPIO_PB17,ENABLE);
 		//printf("INFO(%s)[%d] off frame success!\n",TAG_KEY,__LINE__);
+
+		/* 长显图标关 */
+		osd_long_switsh = 0;
+		osd_type = osd_long_flag;
+		osd_long_flag = -1;
+		sem_post(&sem_osd_long);
 	}
 
 	return;
@@ -998,13 +1038,19 @@ static void  *gpio_ir_thread(void *arg)
 				frame_switch(&key_info_source);
 				sem_post(&sem_led);
 			} else if ( 10 == rd_buf[0] ) { //KEY_2
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				audio_switch(&key_info_source);
 				sem_post(&sem_osd);
 				sem_post(&sem_led);
 				//printf("[INFO] audio on_off\n");
-			} else if ( 2 == rd_buf[0]  ) { //KEY_4
+			} else if ( 4 == rd_buf[0]  ) { //KEY_4
 				//上
 				//printf("[INFO] frame off move\n");
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
@@ -1018,12 +1064,15 @@ static void  *gpio_ir_thread(void *arg)
 				}
 
 				osd_switsh = 1;
-				key_info_source.png_num = 5;
+				key_info_source.png_num = 6;
 				sem_post(&sem_osd);
 				sem_post(&sem_led);
-			} else if ( 4 == rd_buf[0]  ) { //KEY_3
+			} else if ( 2 == rd_buf[0]  ) { //KEY_3
 				//下
 				//printf("[INFO] frame on move\n");
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
@@ -1037,12 +1086,15 @@ static void  *gpio_ir_thread(void *arg)
 				}
 
 				osd_switsh = 1;
-				key_info_source.png_num = 6;
+				key_info_source.png_num = 5;
 				sem_post(&sem_osd);
 				sem_post(&sem_led);
 			} else if ( 5 == rd_buf[0]  ) { //KEY_5
 				//左
 				//printf("[INFO] frame left move\n");
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
@@ -1062,6 +1114,9 @@ static void  *gpio_ir_thread(void *arg)
 			} else if ( 3 == rd_buf[0]  ) { //KEY_6
 				//右
 				//printf("[INFO] frame right move\n");
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				if ( (key_type != KEY_MODE_NORMAL) )
 					continue;
 				if ( !key_info_source.pantilt_flag )
@@ -1081,15 +1136,21 @@ static void  *gpio_ir_thread(void *arg)
 			} else if ( 7 == rd_buf[0]  ) { //KEY_7
 				++key_type;
 				//printf("[INFO] frame mode0\n");
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				if ( key_type == KEY_MODE_NUM ) {
 					key_type = KEY_MODE_SINGLE;
 				}
 
 				key_mode_process(key_type,&key_info_source);
-				sem_post(&sem_osd);
+				sem_post(&sem_osd_long);
 				sem_post(&sem_led);
 			} else if ( 9 == rd_buf[0]  ) { //KEY_8
 				//放大
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				if ( key_type != KEY_MODE_NORMAL)
 					continue;
 				//printf("[INFO] be big\n");
@@ -1109,6 +1170,9 @@ static void  *gpio_ir_thread(void *arg)
 				sem_post(&sem_led);
 			} else if ( 8 == rd_buf[0]  ) { //KEY_9
 				//缩小
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				if ( key_type != KEY_MODE_NORMAL)
 					continue;
 				//printf("[INFO] no be big\n");
@@ -1127,6 +1191,9 @@ static void  *gpio_ir_thread(void *arg)
 				sem_post(&sem_osd);
 				sem_post(&sem_led);
 			} else if ( 11 == rd_buf[0]  ) { //KEY_F1
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				//亮度减
 				//printf("[INFO] -- bright\n");
 				set_brightness_sharpness(DISABLE,&key_info_source.bright_value,ENABLE);
@@ -1135,6 +1202,9 @@ static void  *gpio_ir_thread(void *arg)
 				sem_post(&sem_osd);
 				sem_post(&sem_led);
 			} else if ( 12 == rd_buf[0]  ) { //KEY_F2
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				//亮度加
 				set_brightness_sharpness(ENABLE,&key_info_source.bright_value,ENABLE);
 				//printf("[INFO] ++ bright\n");
@@ -1143,6 +1213,9 @@ static void  *gpio_ir_thread(void *arg)
 				sem_post(&sem_osd);
 				sem_post(&sem_led);
 			} else if ( 0 == rd_buf[0]  ) { //KEY_F3
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				//锐度减
 				//printf("[INFO] -- sharpness\n");
 				set_brightness_sharpness(DISABLE,&key_info_source.sharp_value,DISABLE);
@@ -1151,6 +1224,9 @@ static void  *gpio_ir_thread(void *arg)
 				sem_post(&sem_osd);
 				sem_post(&sem_led);
 			} else if ( 6 == rd_buf[0]  ) { //KEY_F4
+				if ( key_info_source.frame_on_off == DISABLE ) {
+					continue;
+				}
 				//锐度加
 				//printf("[INFO] ++ sharpness\n");
 				set_brightness_sharpness(ENABLE,&key_info_source.sharp_value,DISABLE);
@@ -1177,6 +1253,9 @@ static void  *gpio_ir_thread(void *arg)
 			flag_led = 1;
 			module_key_ctl_write(GPIO_PB17,DISABLE);
 			module_key_ctl_write(GPIO_PB27,ENABLE);
+			osd_long_switsh = 1;
+			osd_long_flag = 9;
+			sem_post(&sem_osd_long);
 		}
 
 		/*
@@ -1202,7 +1281,6 @@ static void  *gpio_ir_thread(void *arg)
 					key_info_source.png_num = -1;
 					flag_osd = 0;
 					/* 进入osd 显示函数 */
-					rd_buf[0] = 0x99;
 					sem_post(&sem_osd);
 				} else {
 					if ( !flag_osd ) {
@@ -1247,6 +1325,7 @@ static void  *gpio_ir_thread(void *arg)
 			flag_osd = 0;
 			flag_led = 0;
 			osd_switsh = 0;
+			osd_long_flag = 0;
 			key_info_source.png_num = -1;
 			key_info_source.pantilt_flag = 0;
 			memset(&zoom_crop, 0, sizeof(zoom_crop));
@@ -1265,9 +1344,10 @@ static void  *gpio_ir_thread(void *arg)
 
 static void  *gpio_osd_thread(void *arg)
 {
+	int ret = 0;
 	while(1) {
 		sem_wait(&sem_osd);
-		if ( get_frame_switch() && rd_buf[0] != 0x55 ) {
+		if ( get_frame_switch() ) {
 			//osd 图像显示
 			/* 控制显示black 图时，协调osd 显示时间和再次进入black图 */
 			if( !key_info_source.frame_on_off ) {
@@ -1276,8 +1356,45 @@ static void  *gpio_osd_thread(void *arg)
 					key_info_source.frame_on_off = 1;
 					flag_osd_black = 0;
 				}
+				//lock
+				ret = pthread_mutex_lock(&lock);
+				if(0 != ret){
+					perror("pthread_mutex_lock");
+					pthread_exit(NULL);
+				}
 				set_osd_show(&osd_switsh,1,key_info_source.png_num);
+				//unlock
+				ret = pthread_mutex_unlock(&lock);
+				if(0 != ret){
+					perror("pthread_mutex_unlock");
+					pthread_exit(NULL);
+				}
 			}
+		}
+	}
+	return NULL;
+}
+
+static void  *gpio_osd_long_thread(void *arg)
+{
+	int ret_long = 0;
+	while(1) {
+		sem_wait(&sem_osd_long);
+		if ( get_frame_switch() ) {
+			//osd 图像显示
+				//lock
+				ret_long = pthread_mutex_lock(&lock);
+				if(0 != ret_long){
+					perror("pthread_mutex_lock");
+					pthread_exit(NULL);
+				}
+				set_osd_show(&osd_long_switsh,2,osd_long_flag);
+				//unlock
+				ret_long = pthread_mutex_unlock(&lock);
+				if(0 != ret_long){
+					perror("pthread_mutex_unlock");
+					pthread_exit(NULL);
+				}
 		}
 	}
 	return NULL;
@@ -1287,7 +1404,7 @@ static void  *gpio_led_thread(void *arg)
 {
 	while(1) {
 		sem_wait(&sem_led);
-		if( get_frame_switch() && rd_buf[0] != 0x55 ) {
+		if( get_frame_switch() ) {
 			//LED 闪烁
 			if( !key_info_source.frame_on_off ) {
 				module_key_ctl_write(GPIO_PB27,ENABLE);
@@ -1322,6 +1439,12 @@ int module_key_process(void)
 		return -1;
 	}
 
+	ret = sem_init(&sem_osd_long, 0, 0);
+	if (ret == -1) {
+		printf("sem_init_led failed \n");
+		return -1;
+	}
+
 	static pthread_t gpio_ir_pid;
 	pthread_attr_t gpio_ir_attr;
 	pthread_attr_init(&gpio_ir_attr);
@@ -1350,6 +1473,17 @@ int module_key_process(void)
 	pthread_attr_setdetachstate(&gpio_osd_attr, PTHREAD_CREATE_DETACHED);
 	pthread_attr_setschedpolicy(&gpio_osd_attr, SCHED_OTHER);
 	ret = pthread_create(&gpio_osd_pid, &gpio_osd_attr, &gpio_osd_thread, NULL);
+	if (ret) {
+		printf("ERROR(%s): create thread for gpio_osd_thread failed!\n", TAG_KEY);
+		return -1;
+	}
+
+	static pthread_t gpio_osd_long_pid;
+	pthread_attr_t gpio_osd_long_attr;
+	pthread_attr_init(&gpio_osd_long_attr);
+	pthread_attr_setdetachstate(&gpio_osd_long_attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_setschedpolicy(&gpio_osd_long_attr, SCHED_OTHER);
+	ret = pthread_create(&gpio_osd_long_pid, &gpio_osd_long_attr, &gpio_osd_long_thread, NULL);
 	if (ret) {
 		printf("ERROR(%s): create thread for gpio_osd_thread failed!\n", TAG_KEY);
 		return -1;
